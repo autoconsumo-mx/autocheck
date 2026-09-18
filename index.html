@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autocheck de Registro — Instalación de Autoconsumo</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<style>
+  :root {
+    --naranja: #FF6600;
+    --naranja-oscuro: #d95500;
+    --texto: #2b2b2b;
+    --gris: #6b7280;
+    --borde: #e2e2e2;
+    --fondo: #f7f7f8;
+    --rojo: #c0392b;
+    --rojo-fondo: #fdecea;
+    --amarillo: #92700a;
+    --amarillo-fondo: #fff6dd;
+    /* Acento brillante para elementos de progreso/gauge en tono "atención" (NO usar para texto de alertas) */
+    --status-warning-accent: #f6b72b;
+    /* Paleta de estatus (fija, validada) — usada solo para el medidor de puntaje */
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical: #d03b3b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    padding: 24px 16px 60px;
+  }
+  .contenedor { max-width: 640px; margin: 0 auto; }
+  .encabezado { text-align: center; margin-bottom: 20px; }
+  .logo-circulo {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: block; object-fit: contain;
+    margin: 0 auto 10px;
+  }
+  .marca { margin-bottom: 10px; }
+  .marca-nombre {
+    display: block; font-weight: 700; font-size: 19px; color: var(--naranja-oscuro);
+    letter-spacing: -0.01em;
+  }
+  .marca-tagline {
+    display: block; font-size: 10.5px; font-weight: 600; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--gris); margin-top: 2px;
+  }
+  h1 { font-size: 21px; margin: 0 0 6px; }
+  .subtitulo { color: var(--gris); font-size: 14px; margin: 0; }
+
+  .progreso-wrap { margin: 20px 0; display: none; }
+  .stepper-numerado { display: flex; align-items: center; margin-bottom: 14px; }
+  .stepper-paso { display: flex; align-items: center; flex: 1; }
+  .stepper-paso:last-child { flex: 0 0 auto; }
+  .stepper-circulo {
+    width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid var(--borde);
+    color: var(--gris); font-size: 12.5px; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; transition: all .2s ease;
+  }
+  .stepper-linea { flex: 1; height: 3px; background: var(--borde); margin: 0 4px; transition: background .2s ease; }
+  .stepper-paso.completado .stepper-circulo { background: var(--status-warning-accent); border-color: var(--status-warning-accent); color: #fff; }
+  .stepper-paso.completado .stepper-linea { background: var(--status-warning-accent); }
+  .stepper-paso.actual .stepper-circulo {
+    background: var(--naranja); border-color: var(--naranja); color: #fff;
+    box-shadow: 0 0 0 4px rgba(255,102,0,0.16);
+  }
+  .progreso-barra { height: 15px; background: var(--borde); border-radius: 8px; overflow: hidden; }
+  .progreso-relleno { height: 100%; background: var(--status-warning-accent); width: 0%; transition: width .2s ease; border-radius: 8px; }
+  .progreso-texto { font-size: 12px; color: var(--gris); margin-top: 6px; text-align: right; }
+
+  .banner-limite {
+    display: none; background: #FAFAFB; border: none; border-left: 2px solid var(--borde); border-radius: 6px;
+    padding: 6px 10px; margin: 0 0 14px; text-align: center;
+  }
+  .banner-limite.mostrar { display: block; }
+  .banner-limite-texto { margin: 0 0 4px; font-size: 11px; color: var(--gris); }
+  .banner-limite-btn {
+    background: none; border: 1px solid var(--borde); border-radius: 999px; color: var(--gris);
+    font-size: 11px; font-weight: 600; padding: 5px 12px; cursor: not-allowed; width: auto;
+  }
+
+  /* Portada ancha: elige tu camino (nuevo suscriptor vs. suscriptor existente) — mismo layout que el mockup aprobado */
+  #contenedor-principal { display: none; }
+
+  .portada-externa { max-width: 1120px; margin: 0 auto; padding: 24px 16px 60px; }
+  .portada-panel {
+    background: #fff; border-radius: 16px; border: 1px solid #E7E7EA;
+    box-shadow: 0 16px 40px rgba(20,20,30,0.08); overflow: hidden;
+  }
+
+  .portada-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: clamp(14px,3vw,22px) clamp(16px,4vw,36px); border-bottom: 1px solid #EFEFF1;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .portada-header-marca { display: flex; align-items: center; gap: 12px; }
+  .portada-header-logo {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: block; object-fit: contain;
+  }
+  .portada-header-nombre { display: flex; flex-direction: column; line-height: 1.25; }
+  .portada-header-nombre .nombre { color: #26262B; font-size: 15px; font-weight: 700; }
+  .portada-header-nombre .tagline { color: #8B8B93; font-size: 11px; letter-spacing: 0.04em; }
+  .portada-header-derecha { text-align: right; line-height: 1.2; }
+  .portada-header-derecha .titulo { color: var(--naranja); font-size: clamp(13px,2vw,15px); font-weight: 800; letter-spacing: 0.03em; }
+  .portada-header-derecha .sub { color: #9A9AA2; font-size: 11px; letter-spacing: 0.06em; }
+
+  .portada-hero-row { display: flex; gap: 40px; align-items: center; padding: clamp(24px,5vw,44px) clamp(16px,4vw,36px) 36px; }
+  @media (max-width: 680px) { .portada-hero-row { flex-direction: column; align-items: stretch; gap: 24px; } }
+  .portada-hero-texto { flex: 1.3; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .portada-titulo-superior { color: var(--naranja); font-size: clamp(19px,3.2vw,24px); font-weight: 800; letter-spacing: 0.04em; }
+  .portada-eyebrow { color: var(--naranja-oscuro); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
+  .portada-titulo { margin: 0; color: #20232B; font-size: clamp(22px,4.2vw,32px); line-height: 1.25; font-weight: 800; }
+  .portada-texto { margin: 0; color: #5B5F6B; font-size: 15px; line-height: 1.6; max-width: 460px; }
+  .portada-bullets { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+  .portada-bullet {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; color: #33363F;
+    border: 1px solid #E7E7EA; border-radius: 8px; padding: 8px 10px; background: #FBFBFC;
+  }
+  .portada-preguntas p { color: #20232B; font-weight: 700; font-size: 14px; margin: 4px 0 0; }
+  .portada-cita-recuadro {
+    font-style: normal; margin-top: 14px; display: flex; flex-direction: column; gap: 6px;
+    background: #FBFBFC; border: 1px solid #E7E7EA; border-radius: 10px; padding: 14px 16px;
+  }
+  .portada-cita-recuadro p { color: #4B4B55; font-size: 14.5px; font-style: italic; line-height: 1.55; margin: 0; }
+  .portada-cita-recuadro .portada-cita-titulo {
+    font-style: normal; color: #20232B; font-size: 15px; font-weight: 800; margin: 0 0 4px;
+  }
+
+  .portada-hero-gauge { flex: 1; display: flex; justify-content: center; min-width: 0; }
+  .portada-gauge-card {
+    background: #EAF3FF; border: 1px solid #D3E6FA; border-radius: 16px;
+    padding: 28px 30px; width: 100%; max-width: 280px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .portada-gauge-card .mi-score-eyebrow { color: var(--naranja-oscuro); font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-align: center; }
+  .portada-gauge-card .titulo { color: #20232B; font-size: 15px; font-weight: 700; text-align: center; line-height: 1.35; }
+  .portada-gauge-card .etiqueta { color: #5A7DA6; font-size: 11px; text-align: center; letter-spacing: 0.03em; text-transform: uppercase; }
+
+  .portada-divisor { height: 1px; background: #EFEFF1; margin: 0 clamp(16px,4vw,36px); }
+
+  .portada-cta-titulo { color: #20232B; font-size: 18px; font-weight: 700; margin: 0 0 20px; text-align: center; }
+  .portada-cards-wrap { padding: 36px clamp(16px,4vw,36px) 8px; }
+  .portada-cards { display: flex; gap: 24px; }
+  @media (max-width: 680px) { .portada-cards { flex-direction: column; } }
+  .portada-card {
+    flex: 1; background: #FBFBFC; border-radius: 14px; border: 1px solid #E7E7EA;
+    padding: 26px 26px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+  }
+  .portada-card-eyebrow { color: #9A9AA2; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .portada-card-titulo { color: #20232B; font-size: 19px; font-weight: 800; }
+  .portada-card-lista { margin: 2px 0 8px; padding-left: 18px; color: #5B5F6B; font-size: 13px; line-height: 1.6; }
+  .portada-card-lista li { margin-bottom: 2px; }
+  .btn-portada-primario, .btn-portada-secundario {
+    border-radius: 9px; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; border: none;
+  }
+  .btn-portada-primario { background: var(--naranja); color: #fff; }
+  .btn-portada-primario:hover { background: var(--naranja-oscuro); }
+  .btn-portada-secundario { background: #fff; color: var(--naranja); border: 2px solid var(--naranja); }
+  .btn-portada-secundario:hover { background: rgba(255,102,0,0.06); }
+
+  .portada-legal { padding: 22px clamp(16px,4vw,36px) 26px; }
+  .portada-legal p { color: #9A9AA2; font-size: 11px; line-height: 1.6; margin: 0 0 10px; }
+  .portada-legal a { color: var(--naranja-oscuro); }
+
+  .portada-footer-externo { margin-top: 22px; text-align: center; color: #A6A6AD; font-size: 9px; line-height: 1.6; }
+
+  .pantalla-acceso {
+    display: none; background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 24px;
+  }
+  .pantalla-acceso h2 { font-size: 19px; margin: 0 0 8px; }
+  .link-volver {
+    background: none; border: none; padding: 0; margin-bottom: 14px; color: var(--gris);
+    font-size: 13px; cursor: pointer; text-decoration: underline;
+  }
+
+  form {
+    background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 24px;
+    display: none;
+  }
+  .paso { display: none; }
+  .paso.activo { display: block; }
+  .paso-titulo { font-size: 19px; font-weight: 800; letter-spacing: .01em; color: var(--naranja-oscuro); margin: 0 0 18px; }
+
+  label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .campo { margin-bottom: 18px; }
+  .ayuda { font-size: 12px; color: var(--gris); margin-top: 4px; }
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"], select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 8px;
+    font-size: 15px; font-family: inherit; color: var(--texto); background: #fff;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(255,102,0,0.15);
+  }
+  .opciones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .opciones label {
+    display: flex; align-items: center; gap: 6px; font-weight: 400; font-size: 14px;
+    border: 1px solid var(--borde); border-radius: 8px; padding: 8px 12px; cursor: pointer;
+    flex: 1; justify-content: center; min-width: 90px; margin-bottom: 0;
+  }
+  .opciones input { accent-color: var(--naranja); }
+  .opciones label:has(input:checked) { border-color: var(--naranja); background: rgba(255,102,0,0.06); }
+
+  .tanques-lista { display: flex; flex-direction: column; gap: 8px; }
+  .tanque-fila { display: flex; align-items: center; gap: 10px; }
+  .tanque-fila span { font-size: 13px; color: var(--gris); min-width: 64px; }
+
+  .campo-consentimiento { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--borde); }
+  .opcion-checkbox {
+    display: flex; align-items: flex-start; gap: 10px; font-weight: 400;
+    font-size: 13.5px; line-height: 1.5; color: var(--texto); cursor: pointer;
+  }
+  .opcion-checkbox input[type="checkbox"] {
+    width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; accent-color: var(--naranja);
+  }
+  .link-aviso {
+    background: none; border: none; padding: 0; margin: 0; font: inherit;
+    color: var(--naranja-oscuro); text-decoration: underline; cursor: pointer;
+  }
+
+  .modal-fondo {
+    display: none; position: fixed; inset: 0; background: rgba(11,11,11,0.5);
+    align-items: center; justify-content: center; padding: 20px; z-index: 100;
+  }
+  .modal-fondo.mostrar { display: flex; }
+  .modal-caja {
+    background: #fff; border-radius: 12px; max-width: 640px; width: 100%;
+    max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-encabezado {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--borde); flex-shrink: 0;
+  }
+  .modal-encabezado h2 { font-size: 16px; margin: 0; }
+  .modal-cerrar {
+    background: none; border: none; font-size: 20px; line-height: 1; color: var(--gris);
+    cursor: pointer; padding: 4px 8px;
+  }
+  .modal-cuerpo { padding: 4px 20px 20px; overflow-y: auto; font-size: 13.5px; line-height: 1.6; }
+  .modal-cuerpo h3 { font-size: 15px; margin: 18px 0 6px; }
+  .modal-cuerpo h3:first-child { margin-top: 4px; }
+  .modal-cuerpo h4 { font-size: 13.5px; margin: 16px 0 4px; color: var(--naranja-oscuro); }
+  .modal-cuerpo p { margin: 0 0 10px; color: var(--texto); }
+  .modal-cuerpo ul, .modal-cuerpo ol { margin: 0 0 10px; padding-left: 20px; }
+  .modal-cuerpo li { margin-bottom: 4px; }
+  .modal-cuerpo a { color: var(--naranja-oscuro); }
+  .modal-pie { padding: 14px 20px; border-top: 1px solid var(--borde); flex-shrink: 0; }
+  .modal-pie button { width: 100%; }
+
+  .alerta {
+    display: none; margin-top: 8px; padding: 10px 12px; border-radius: 8px;
+    font-size: 13px; line-height: 1.4;
+  }
+  .alerta.mostrar { display: block; }
+  .alerta.roja { background: var(--rojo-fondo); color: var(--rojo); }
+  .alerta.amarilla { background: var(--amarillo-fondo); color: var(--amarillo); }
+
+  .botones { display: flex; gap: 10px; margin-top: 24px; }
+  button {
+    flex: 1; border: none; border-radius: 8px; padding: 14px; font-size: 15px;
+    font-weight: 600; cursor: pointer; transition: background .15s ease;
+  }
+  .btn-siguiente, .btn-enviar { background: var(--naranja); color: #fff; }
+  .btn-siguiente:hover, .btn-enviar:hover { background: var(--naranja-oscuro); }
+  .btn-siguiente:disabled, .btn-enviar:disabled { background: #d1a480; cursor: not-allowed; }
+  .btn-atras { background: #fff; color: var(--texto); border: 1px solid var(--borde); }
+  .btn-atras:hover { background: #f0f0f0; }
+
+  .mensaje { margin-top: 14px; font-size: 14px; text-align: center; }
+  .mensaje.error { color: var(--rojo); }
+
+  .pantalla-otp {
+    display: none; background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 32px 24px; text-align: center;
+  }
+  .pantalla-otp .icono {
+    width: 56px; height: 56px; border-radius: 50%; background: rgba(255,102,0,0.1); color: var(--naranja-oscuro);
+    font-size: 26px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+  }
+  .otp-input {
+    width: 280px; max-width: 100%; margin: 20px auto 0; display: block;
+    font-size: 22px; letter-spacing: 0.3em; text-align: center; padding: 12px 0 12px 0.3em;
+    border: 1px solid var(--borde); border-radius: 8px;
+  }
+  .otp-input:focus { outline: none; border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(255,102,0,0.15); }
+  .otp-acciones { margin-top: 20px; }
+  .otp-reenviar {
+    background: none; border: none; color: var(--naranja-oscuro); font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 8px; text-decoration: underline;
+  }
+  .otp-reenviar:disabled { color: var(--gris); text-decoration: none; cursor: not-allowed; }
+  .otp-corregir { display: block; margin-top: 6px; font-size: 13px; color: var(--gris); background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+  /* ---- Pantalla de resultado (rediseño 16-sep-2026) ---- */
+  .pantalla-resultado {
+    display: none; background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 32px 24px; text-align: center;
+  }
+  .resultado-eyebrow {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--naranja-oscuro); margin: 0;
+  }
+  .resultado-titulo-score { font-size: 22px; font-weight: 700; color: var(--texto); margin: 2px 0 0; }
+
+  /* Medidor tipo dona (semicírculo) */
+  .gauge-wrap { position: relative; width: 220px; height: 116px; margin: 20px auto 0; overflow: hidden; }
+  .gauge-arco {
+    position: absolute; top: 0; left: 0; width: 220px; height: 220px; border-radius: 50%;
+    background: conic-gradient(from -90deg,
+      var(--gauge-color, var(--naranja)) 0deg calc(var(--pct, 0) * 1.8deg),
+      #eceef0 calc(var(--pct, 0) * 1.8deg) 180deg,
+      transparent 180deg 360deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 24px), #000 calc(100% - 24px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 24px), #000 calc(100% - 24px));
+  }
+  .gauge-numero {
+    position: absolute; left: 0; right: 0; bottom: 2px; text-align: center;
+    font-size: 32px; font-weight: 800; color: var(--texto);
+  }
+  .resultado-pill {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+    font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 999px;
+  }
+  .resultado-pill .pill-icono {
+    width: 18px; height: 18px; border-radius: 50%; color: #fff; font-size: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Conteos rápidos */
+  .resultado-conteos { text-align: left; margin-top: 18px; display: flex; flex-direction: column; gap: 6px; }
+  .resultado-conteo { display: flex; align-items: baseline; gap: 8px; font-size: 13.5px; color: var(--texto); }
+  .resultado-conteo .punto { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .resultado-conteo.rojo .punto { background: var(--rojo); }
+  .resultado-conteo.amarillo .punto { background: var(--amarillo); }
+
+  .resultado-divisor { border: none; border-top: 1px solid var(--borde); margin: 20px 0; }
+
+  .resultado-seccion { text-align: left; }
+  .resultado-datos-caja { background: #FAFAFB; border-radius: 8px; padding: 10px 14px; }
+  .resultado-datos-caja h3 { font-size: 12px; margin: 0 0 6px; color: var(--gris); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  .resultado-datos-lista { margin: 0; padding: 0 0 0 16px; font-size: 12px; color: var(--texto); line-height: 1.6; }
+
+  .resultado-caja { border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; text-align: left; }
+  .resultado-caja.critico { background: var(--rojo-fondo); }
+  .resultado-caja.atencion { background: var(--amarillo-fondo); }
+  .resultado-caja.fortalezas { background: #e7f6ec; }
+  .resultado-caja-titulo { font-size: 13.5px; font-weight: 700; margin: 0 0 2px; }
+  .resultado-caja.critico .resultado-caja-titulo { color: var(--rojo); }
+  .resultado-caja.atencion .resultado-caja-titulo { color: var(--amarillo); }
+  .resultado-caja.fortalezas .resultado-caja-titulo { color: #1c7a3d; }
+  .resultado-caja-nota { font-size: 12px; color: var(--gris); margin: 0 0 10px; }
+  .resultado-caja ul { margin: 0; padding-left: 18px; }
+  .resultado-caja li { font-size: 13px; line-height: 1.6; margin-bottom: 6px; color: var(--texto); }
+  .resultado-caja li:last-child { margin-bottom: 0; }
+  .resultado-caja li strong { display: block; }
+
+  .resultado-envio { font-size: 12.5px; color: var(--gris); margin: 4px 0 18px; text-align: center; }
+  .resultado-mensaje-nivel { font-size: 14.5px; line-height: 1.6; color: var(--texto); margin: 0 0 4px; text-align: center; }
+  .resultado-pregunta-consulta { font-size: 14.5px; font-weight: 600; margin: 4px 0 14px; text-align: center; }
+  .btn-agendar-consulta {
+    display: block; width: 100%; background: var(--naranja); color: #fff; border: none; border-radius: 8px;
+    padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.02em;
+  }
+  .btn-agendar-consulta:hover { background: var(--naranja-oscuro); }
+  .pie-marca {
+    text-align: center; font-size: 8px; letter-spacing: 0.06em; color: var(--gris);
+    line-height: 1.6; margin: 18px 0 0;
+  }
+  .pie-beta {
+    text-align: center; font-size: 10px; color: var(--gris);
+    line-height: 1.5; margin: 10px 0 0;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="portada-externa" id="portada">
+  <div class="portada-panel">
+    <div class="portada-header">
+      <div class="portada-header-marca">
+        <img class="portada-header-logo" src="data:image/png;base64,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" alt="autoconsumo.mx">
+        <div class="portada-header-nombre">
+          <span class="nombre">autoconsumo.mx</span>
+          <span class="tagline">PERMISOS &amp; COMPLIANCE</span>
+        </div>
+      </div>
+      <div class="portada-header-derecha">
+        <div class="titulo">AUTOCHECK</div>
+        <div class="sub">PRE-REGISTRO CNE | 2026</div>
+      </div>
+    </div>
+
+    <div class="portada-hero-row">
+      <div class="portada-hero-texto">
+        <div class="portada-titulo-superior">REGISTRO DE AUTOCONSUMOS CNE-2026</div>
+        <div class="portada-eyebrow">SERVICIO GRATUITO PARA SUSCRIPTORES DE AUTOCONSUMO.MX</div>
+        <h1 class="portada-titulo">¿Qué tan lista está tu instalación para el registro regulatorio?</h1>
+        <p class="portada-texto">Antes de entregar información sensible de tu empresa, haz tu propio Autocheck: te dice en minutos dónde estás bien y dónde hay pendientes.</p>
+        <div class="portada-bullets">
+          <div class="portada-bullet">🟡 Marca advertencias antes de que sean un problema</div>
+          <div class="portada-bullet">🔴 Señala avisos críticos que bloquean tu registro</div>
+        </div>
+        <div class="portada-preguntas">
+          <p>¿Quieres saber si puedes registrarte?</p>
+          <p>¿Quieres conocer lo que te falta?</p>
+          <p>¿Conoces tus riesgos?</p>
+        </div>
+        <div class="portada-cita-recuadro">
+          <p class="portada-cita-titulo">¿Me registro o no?</p>
+          <p>"Todo lo que digas o hagas puede ser usado en tu contra..."</p>
+          <p>"Lo dicho, dicho está...será tu verdad legal de aquí en adelante..."</p>
+          <p>"Cómo saber qué sigue..."</p>
+        </div>
+      </div>
+
+      <div class="portada-hero-gauge">
+        <div class="portada-gauge-card">
+          <div class="mi-score-eyebrow">MI SCORE</div>
+          <div class="titulo">¿Cómo está mi instalación para el registro?</div>
+          <svg width="130" height="130" viewBox="0 0 130 130">
+            <circle cx="65" cy="65" r="50" fill="none" stroke="#D3E6FA" stroke-width="14"/>
+            <circle cx="65" cy="65" r="50" fill="none" stroke="var(--naranja)" stroke-width="14"
+              stroke-dasharray="210.5 314.16" stroke-linecap="round"
+              transform="rotate(-90 65 65)"/>
+            <text x="65" y="73" text-anchor="middle" fill="var(--texto)" font-size="26" font-weight="800" font-family="Arial, Helvetica, sans-serif">67%</text>
+          </svg>
+          <div class="etiqueta">Ejemplo de tu score</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portada-divisor"></div>
+
+    <div class="portada-cards-wrap">
+      <div class="portada-cta-titulo">Empieza tu Autocheck</div>
+      <div class="portada-cards">
+        <div class="portada-card">
+          <div class="portada-card-eyebrow">¿Primera vez aquí?</div>
+          <div class="portada-card-titulo">Suscríbete gratis</div>
+          <ul class="portada-card-lista">
+            <li>Registra tus datos</li>
+            <li>Acepta el Aviso de Privacidad</li>
+            <li>Confirma tu correo y listo!</li>
+          </ul>
+          <button type="button" class="btn-portada-secundario" id="btn-ir-suscribir">Suscribirme gratis</button>
+        </div>
+        <div class="portada-card">
+          <div class="portada-card-eyebrow">¿Ya tienes suscripción?</div>
+          <div class="portada-card-titulo">Entra directo al Autocheck</div>
+          <ul class="portada-card-lista">
+            <li>Ingresa tu correo</li>
+            <li>Recibe tu código de acceso</li>
+            <li>Utiliza el formulario y obtén tu resultado!</li>
+          </ul>
+          <button type="button" class="btn-portada-primario" id="btn-ir-acceso">Entrar a mi Autocheck</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="portada-legal">
+      <p>Este servicio de autocheck no constituye una asesoría legal o regulatoria. Es un checklist basado en el contenido de las disposiciones publicadas en el Diario Oficial de la Federación.</p>
+      <p>El Registro de Autoconsumo de la Comisión Nacional de Energía se gestiona en línea y es gratuito. Si quieres registrarte directamente visita el sitio oficial de la CNE aquí: <a href="https://registroautoconsumo.cne.gob.mx/" target="_blank" rel="noopener">registroautoconsumo.cne.gob.mx</a></p>
+    </div>
+  </div>
+
+  <div class="portada-footer-externo">POWERED BY REGNAUTILUS<br>FUEL EXPERTS S DE RL DE CV</div>
+</div>
+
+<div class="contenedor" id="contenedor-principal">
+  <div class="encabezado">
+    <img class="logo-circulo" src="data:image/png;base64,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" alt="autoconsumo.mx" width="56" height="56">
+    <div class="marca">
+      <span class="marca-nombre">autoconsumo.mx</span>
+      <span class="marca-tagline">Permisos &amp; Compliance</span>
+    </div>
+    <h1>Autocheck | Registro CNE</h1>
+    <p class="subtitulo">Portal de autoevaluación previa | Para conocer tu estatus y riesgos antes del registro de instalaciones de autoconsumo en la CNE</p>
+  </div>
+
+  <div class="pantalla-acceso" id="pantalla-acceso">
+    <h2>Entra a tu Autocheck</h2>
+    <p class="subtitulo">Ingresa el correo con el que te suscribiste. Te enviaremos un código de acceso.</p>
+    <div class="campo" style="margin-top:16px;">
+      <label for="acceso-correo">Correo <span class="requerido">*</span></label>
+      <input type="email" id="acceso-correo" required>
+    </div>
+    <p id="acceso-mensaje" class="mensaje" role="status" aria-live="polite"></p>
+    <div class="botones">
+      <button type="button" class="btn-siguiente" id="btn-acceso-enviar">Enviar código</button>
+    </div>
+  </div>
+
+  <div class="banner-limite" id="banner-limite-gratis">
+    <p class="banner-limite-texto" id="banner-limite-texto"></p>
+    <button type="button" class="banner-limite-btn" id="banner-limite-btn" disabled title="Próximamente">¿Necesitas más? Adquiere Autocheck-Plus</button>
+  </div>
+
+  <div class="progreso-wrap">
+    <div class="stepper-numerado" id="stepper-numerado"></div>
+    <div class="progreso-barra"><div class="progreso-relleno" id="progreso-relleno"></div></div>
+    <div class="progreso-texto" id="progreso-texto">Paso 1 de 6</div>
+  </div>
+
+  <form id="formulario-autocheck" novalidate>
+
+    <!-- PASO 1: Datos de tu suscripción -->
+    <div class="paso activo" data-paso="1">
+      <p class="paso-titulo">1. Datos de tu suscripción</p>
+      <div class="campo">
+        <label for="empresa">Nombre de la empresa (razón social) <span class="requerido">*</span></label>
+        <input type="text" id="empresa" required>
+      </div>
+      <div class="campo">
+        <label for="nombre_contacto">Tu nombre <span class="requerido">*</span></label>
+        <input type="text" id="nombre_contacto" required>
+      </div>
+      <div class="campo">
+        <label for="correo">Correo <span class="requerido">*</span></label>
+        <input type="email" id="correo" required>
+      </div>
+      <div class="campo">
+        <label for="whatsapp">WhatsApp <span class="requerido">*</span></label>
+        <input type="tel" id="whatsapp" required placeholder="10 dígitos">
+      </div>
+
+      <div class="campo campo-consentimiento">
+        <label class="opcion-checkbox">
+          <input type="checkbox" id="acepto-privacidad" required>
+          <span>He leído y acepto el <button type="button" class="link-aviso" id="btn-ver-aviso">Aviso de Privacidad</button>, y deseo suscribirme para recibir mi Autocheck y las comunicaciones de Fuel Experts relacionadas con autoconsumo. <span class="requerido">*</span></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- PASO 2: Combustibles y tanques -->
+    <div class="paso" data-paso="2">
+      <p class="paso-titulo">2. Combustible e instalación</p>
+      <div class="campo">
+        <label for="nombre_instalacion">Nombre o apodo de esta instalación</label>
+        <input type="text" id="nombre_instalacion" placeholder="Ej. Patio Sur">
+        <p class="ayuda">Si tienes más de una instalación, usa un nombre distinto para diferenciarlas en tus autochecks.</p>
+      </div>
+      <div class="campo">
+        <label>Combustible que almacenas/despachas <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="checkbox" name="combustible" value="Diesel"> Diesel</label>
+          <label><input type="checkbox" name="combustible" value="Gasolina"> Gasolina</label>
+          <label><input type="checkbox" name="combustible" value="GLP"> GLP</label>
+          <label><input type="checkbox" name="combustible" value="GN"> GN</label>
+        </div>
+        <p class="ayuda">Puedes elegir más de uno.</p>
+      </div>
+      <div class="campo">
+        <label for="cantidad_tanques">Cantidad de tanques de almacenamiento <span class="requerido">*</span></label>
+        <input type="number" id="cantidad_tanques" min="1" step="1" required>
+        <div class="alerta amarilla" id="alerta-tanques">Si declaraste más de un combustible, debes tener al menos el mismo número de tanques — uno por combustible como mínimo.</div>
+      </div>
+      <div class="campo">
+        <label>Capacidad de cada tanque (en litros) <span class="requerido">*</span></label>
+        <div class="tanques-lista" id="lista-capacidad-tanques">
+          <p class="ayuda">Indica primero la cantidad de tanques.</p>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="antiguedad">Antigüedad de la instalación (años) <span class="requerido">*</span></label>
+        <input type="number" id="antiguedad" min="0" step="1" required>
+      </div>
+    </div>
+
+    <!-- PASO 3: Permisos y documentación -->
+    <div class="paso" data-paso="3">
+      <p class="paso-titulo">3. Permisos y documentación</p>
+
+      <div class="campo">
+        <label>¿Tienes permiso para operar la instalación (SENER, CRE o CNE)? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="tiene_permiso" value="si"> Sí</label>
+          <label><input type="radio" name="tiene_permiso" value="no"> No</label>
+        </div>
+        <div class="alerta roja" id="alerta-tiene-permiso">Las instalaciones que ya tienen permiso no pueden gestionar este registro.</div>
+        <div class="campo" id="wrap-permisos-vigentes" style="display:none; margin-top:10px;">
+          <label>¿Cuál(es)?</label>
+          <div class="opciones">
+            <label><input type="checkbox" name="permiso_vigente" value="SENER"> SENER</label>
+            <label><input type="checkbox" name="permiso_vigente" value="CRE"> CRE</label>
+            <label><input type="checkbox" name="permiso_vigente" value="CNE"> CNE</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>¿Tienes un Informe Preventivo o Manifestación de Impacto Ambiental que incluya la operación de la estación? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="tiene_mia" value="si"> Sí</label>
+          <label><input type="radio" name="tiene_mia" value="no"> No</label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>¿Tienes título de propiedad o contrato de arrendamiento o uso del predio? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="titulo_predio" value="si"> Sí</label>
+          <label><input type="radio" name="titulo_predio" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-titulo-predio">Es importante documentar con claridad el título con el que ocupas el predio.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Tienes planos de la instalación? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="tiene_planos" value="si"> Sí</label>
+          <label><input type="radio" name="tiene_planos" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-planos">Es importante hacerlos antes de intentar el registro.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Tienes factura o garantía del tanque y las instalaciones? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="factura_tanque" value="si"> Sí</label>
+          <label><input type="radio" name="factura_tanque" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-factura-tanque">Si no la tienes, hay que elaborar una descripción lo más detallada y certera posible.</div>
+      </div>
+    </div>
+
+    <!-- PASO 4: Compras y facturación -->
+    <div class="paso" data-paso="4">
+      <p class="paso-titulo">4. Compras y facturación de combustible</p>
+
+      <div class="campo">
+        <label>¿Compraste y facturaste combustibles en 2025? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="compra_2025" value="si"> Sí</label>
+          <label><input type="radio" name="compra_2025" value="no"> No</label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>¿Compraste y facturaste combustibles en 2026? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="compra_2026" value="si"> Sí</label>
+          <label><input type="radio" name="compra_2026" value="no"> No</label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>¿Tienes al menos tres facturas de combustible de este año? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="tres_facturas" value="si"> Sí</label>
+          <label><input type="radio" name="tres_facturas" value="no"> No</label>
+        </div>
+        <div class="alerta roja" id="alerta-tres-facturas">Si no las tienes, no puedes gestionar el registro — pero aún puedes obtener cargas con factura antes del 31 de diciembre.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Conoces el número de permiso de tu distribuidor de combustible? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="permiso_distribuidor" value="si"> Sí</label>
+          <label><input type="radio" name="permiso_distribuidor" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-permiso-distribuidor">Es importante identificarlo claramente antes de iniciar el registro.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Reportas controles volumétricos al SAT? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="controles_volumetricos" value="si"> Sí</label>
+          <label><input type="radio" name="controles_volumetricos" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-controles-volumetricos">Es importante medir los flujos para evitar una sanción fiscal.</div>
+      </div>
+    </div>
+
+    <!-- PASO 5: Operación -->
+    <div class="paso" data-paso="5">
+      <p class="paso-titulo">5. Operación y uso</p>
+
+      <div class="campo">
+        <label>¿Surtes únicamente a vehículos de la misma empresa que compra el combustible? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="surte_propios" value="si"> Sí</label>
+          <label><input type="radio" name="surte_propios" value="no"> No</label>
+        </div>
+        <div class="alerta roja" id="alerta-surte-propios">Si no es así, no podrás obtener un registro exitoso y te encuentras en un riesgo regulatorio grave.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Tienes una relación exacta de esos vehículos? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="relacion_vehiculos" value="si"> Sí</label>
+          <label><input type="radio" name="relacion_vehiculos" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-relacion-vehiculos">Es importante que la construyas antes del registro.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿La instalación está operando actualmente? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="operando" value="si"> Sí</label>
+          <label><input type="radio" name="operando" value="no"> No</label>
+        </div>
+        <div class="alerta roja" id="alerta-operando">Si no opera, no puedes obtener el registro. Hay que verificar si puede operar antes del 31 de diciembre.</div>
+      </div>
+
+      <div class="campo">
+        <label for="estado">Estado de la República en que se encuentra la instalación <span class="requerido">*</span></label>
+        <select id="estado" required>
+          <option value="" disabled selected>Selecciona un estado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PASO 6: Antecedentes regulatorios -->
+    <div class="paso" data-paso="6">
+      <p class="paso-titulo">6. Antecedentes regulatorios</p>
+
+      <div class="campo">
+        <label>¿Has recibido visitas o inspecciones de ASEA? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="inspeccion_asea" value="si"> Sí</label>
+          <label><input type="radio" name="inspeccion_asea" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-inspeccion-asea">Es importante revisar el estatus para evitar complicaciones futuras.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Has recibido visitas o inspecciones de CNE? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="inspeccion_cne" value="si"> Sí</label>
+          <label><input type="radio" name="inspeccion_cne" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-inspeccion-cne">Es importante revisar el estatus para evitar complicaciones futuras.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Has recibido visitas o inspecciones de la Fiscalía, Ministerio Público o Guardia Nacional? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="inspeccion_fiscalia" value="si"> Sí</label>
+          <label><input type="radio" name="inspeccion_fiscalia" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-inspeccion-fiscalia">Es importante revisar el estatus para evitar complicaciones futuras.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿La instalación está bajo algún procedimiento de clausura o sanción? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="clausura_sancion" value="si"> Sí</label>
+          <label><input type="radio" name="clausura_sancion" value="no"> No</label>
+        </div>
+        <div class="alerta roja" id="alerta-clausura-sancion">Es importante revisar el estatus para evitar complicaciones futuras — existe un riesgo que puede ser mayor.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Has presentado solicitudes para obtener el permiso ante la CRE o CNE antes? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="solicitud_previa" value="si"> Sí</label>
+          <label><input type="radio" name="solicitud_previa" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-solicitud-previa">Hay que revisar la fecha de ingreso y su estatus actual.</div>
+      </div>
+
+      <div class="campo">
+        <label>¿Te han negado permisos o autorizaciones respecto de la instalación antes? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="permiso_negado" value="si"> Sí</label>
+          <label><input type="radio" name="permiso_negado" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-permiso-negado">Es posible que los datos previos se crucen.</div>
+      </div>
+    </div>
+
+    <!-- PASO 7: Interés -->
+    <div class="paso" data-paso="7">
+      <p class="paso-titulo">7. Interés en el registro</p>
+      <div class="campo">
+        <label>Después de tu Registro CNE ¿Tienes interés en gestionar un permiso definitivo para la instalación? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="interes_permiso" value="si"> Sí</label>
+          <label><input type="radio" name="interes_permiso" value="no"> No</label>
+        </div>
+        <div class="alerta amarilla" id="alerta-interes-permiso">Toma en cuenta que el registro tiene como finalidad gestionar permisos en el futuro.</div>
+      </div>
+
+      <div class="campo">
+        <label>El Registro CNE-2026 es gratuito y en línea ¿Lo harás por tu cuenta, o prefieres contar con acompañamiento y asesoría especializada? <span class="requerido">*</span></label>
+        <div class="opciones">
+          <label><input type="radio" name="tipo_registro" value="por_mi_cuenta"> Por mi cuenta</label>
+          <label><input type="radio" name="tipo_registro" value="con_acompanamiento"> Con acompañamiento</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="botones">
+      <button type="button" class="btn-atras" id="btn-atras" style="display:none;">Atrás</button>
+      <button type="button" class="btn-siguiente" id="btn-siguiente">Siguiente</button>
+      <button type="submit" class="btn-enviar" id="btn-enviar" style="display:none;">Enviar autocheck</button>
+    </div>
+    <p id="mensaje" class="mensaje" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="modal-fondo" id="modal-aviso">
+    <div class="modal-caja">
+      <div class="modal-encabezado">
+        <h2>Aviso de Privacidad de Autocheck</h2>
+        <button type="button" class="modal-cerrar" id="btn-cerrar-aviso" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-cuerpo">
+        <p><em>Última actualización: 7 de septiembre de 2026</em></p>
+
+        <h4>Responsable del tratamiento</h4>
+        <p>FUEL EXPERTS, S. DE R.L., conocida comercialmente como Fuel Experts, con domicilio en Avenida Ciudad Universitaria 286, código postal 01900, Ciudad de México, es responsable del tratamiento de los datos personales recabados mediante Autocheck, disponible a través de Autoconsumo.mx.</p>
+
+        <h4>Autocheck como beneficio de la suscripción</h4>
+        <p>Autocheck es un servicio gratuito para los suscriptores de Autoconsumo.mx.</p>
+        <p>Mediante esta suscripción, el usuario puede obtener un score preliminar sobre la viabilidad de registro de su instalación y recibir información, novedades regulatorias, herramientas y propuestas de servicios relacionadas con autoconsumo.</p>
+        <p>El usuario podrá cancelar su suscripción en cualquier momento mediante el enlace incluido en cada correo electrónico.</p>
+
+        <h4>Datos recabados</h4>
+        <p>Para prestar el servicio podrán recabarse los siguientes datos:</p>
+        <ul>
+          <li>Nombre.</li>
+          <li>Empresa o razón social.</li>
+          <li>Nombre o identificación de la instalación.</li>
+          <li>Correo electrónico.</li>
+          <li>Número de teléfono o WhatsApp.</li>
+          <li>Entidad federativa donde se encuentra la instalación.</li>
+          <li>Información proporcionada mediante las respuestas sobre las características, operación, antecedentes, documentación y situación regulatoria de la instalación.</li>
+        </ul>
+        <p>Autocheck no solicita la carga de documentos ni está diseñado para recabar datos personales sensibles. El usuario deberá abstenerse de proporcionar información personal distinta de la expresamente solicitada.</p>
+
+        <h4>Finalidades del tratamiento</h4>
+        <p>Los datos y respuestas proporcionados serán utilizados para:</p>
+        <ol>
+          <li>Registrar y administrar la suscripción del usuario a Autoconsumo.mx.</li>
+          <li>Procesar las respuestas proporcionadas en Autocheck.</li>
+          <li>Generar automáticamente un score preliminar sobre la viabilidad de registro de la instalación.</li>
+          <li>Mostrar el resultado y enviarlo al correo electrónico proporcionado.</li>
+          <li>Identificar al usuario y mantener vinculados sus resultados.</li>
+          <li>Generar y enviar claves, enlaces o instrucciones para utilizar Autocheck u otros servicios de Autoconsumo.mx disponibles para suscriptores.</li>
+          <li>Enviar información sobre cambios, plazos y novedades regulatorias relacionadas con instalaciones de autoconsumo.</li>
+          <li>Informar sobre formularios, herramientas, contenidos y servicios ofrecidos por Fuel Experts o Autoconsumo.mx.</li>
+          <li>Enviar propuestas de acompañamiento, asesoría u otros servicios relacionados con la instalación.</li>
+          <li>Realizar actividades de mercadotecnia, publicidad y prospección comercial vinculadas con autoconsumo.</li>
+          <li>Mantener la seguridad y el correcto funcionamiento del formulario y de los servicios asociados.</li>
+          <li>Cumplir las obligaciones legales aplicables.</li>
+        </ol>
+        <p>La recepción de comunicaciones relacionadas con autoconsumo forma parte de la suscripción que permite al usuario acceder gratuitamente a Autocheck.</p>
+
+        <h4>Características del score</h4>
+        <p>El score de Autocheck se genera automáticamente a partir de las respuestas proporcionadas por el usuario.</p>
+        <p>Su resultado es exclusivamente preliminar, informativo y orientativo. No constituye una resolución de autoridad, un dictamen jurídico o técnico, ni garantiza que la instalación pueda obtener un registro, permiso o autorización.</p>
+
+        <h4>Estadísticas y mejora del servicio</h4>
+        <p>Fuel Experts podrá utilizar información agregada o anonimizada para elaborar estadísticas, identificar tendencias, evaluar el funcionamiento de Autocheck y mejorar sus herramientas.</p>
+        <p>Una vez anonimizada, esta información no permitirá identificar al usuario.</p>
+
+        <h4>Transferencias y proveedores tecnológicos</h4>
+        <p>Fuel Experts no venderá los datos personales ni los transferirá a terceros para finalidades diferentes de las establecidas en este aviso, salvo cuando sea necesario para cumplir una obligación legal o se actualice alguno de los supuestos permitidos por la legislación aplicable.</p>
+        <p>Los datos podrán ser tratados por proveedores de alojamiento, almacenamiento, correo electrónico, mensajería, administración de usuarios, seguridad e infraestructura tecnológica que presten servicios a Fuel Experts. Estos proveedores deberán tratar la información conforme a las instrucciones de Fuel Experts y protegerla adecuadamente.</p>
+
+        <h4>Conservación y seguridad</h4>
+        <p>Los datos personales serán conservados mientras la suscripción permanezca activa y durante el tiempo adicional necesario para cumplir obligaciones legales, atender responsabilidades derivadas del servicio o defender derechos de Fuel Experts o del titular.</p>
+        <p>Cuando los datos dejen de ser necesarios, serán bloqueados y posteriormente eliminados conforme a la legislación aplicable.</p>
+        <p>Fuel Experts implementará medidas administrativas, técnicas y físicas razonables para protegerlos contra pérdida, daño, alteración, destrucción o acceso, uso y divulgación no autorizados.</p>
+
+        <h4>Cancelación de la suscripción</h4>
+        <p>El usuario podrá cancelar su suscripción y dejar de recibir comunicaciones en cualquier momento mediante el enlace de cancelación incluido en cada correo electrónico enviado por Fuel Experts.</p>
+        <p>La cancelación impedirá el envío de nuevas comunicaciones, sin afectar la licitud del tratamiento realizado con anterioridad ni la conservación de información necesaria para cumplir obligaciones legales.</p>
+
+        <h4>Derechos ARCO</h4>
+        <p>El titular puede ejercer sus derechos de:</p>
+        <ul>
+          <li><strong>Acceso:</strong> conocer qué datos personales conservamos y cómo los utilizamos.</li>
+          <li><strong>Rectificación:</strong> corregir datos inexactos, incompletos o desactualizados.</li>
+          <li><strong>Cancelación:</strong> solicitar la eliminación de sus datos cuando resulte legalmente procedente.</li>
+          <li><strong>Oposición:</strong> solicitar que sus datos no sean utilizados para determinadas finalidades.</li>
+        </ul>
+        <p>También puede revocar su consentimiento o solicitar la limitación del uso o divulgación de sus datos personales.</p>
+        <p>La solicitud deberá enviarse a <a href="mailto:arco@mail.autoconsumo.mx">arco@mail.autoconsumo.mx</a> e incluir:</p>
+        <ol>
+          <li>Nombre del titular.</li>
+          <li>Medio para comunicarle la respuesta.</li>
+          <li>Descripción clara del derecho que desea ejercer.</li>
+          <li>Identificación de los datos personales relacionados con su solicitud.</li>
+          <li>Documento que acredite su identidad y, en su caso, la representación legal.</li>
+          <li>Cualquier información que facilite la localización de sus datos.</li>
+        </ol>
+        <p>Fuel Experts comunicará la determinación adoptada dentro de los veinte días siguientes a la recepción de la solicitud. Si resulta procedente, la hará efectiva dentro de los quince días siguientes, sin perjuicio de las ampliaciones permitidas por la legislación aplicable.</p>
+
+        <h4>Cambios al aviso de privacidad</h4>
+        <p>Fuel Experts podrá modificar este aviso para atender cambios legales, regulatorios, tecnológicos o relacionados con sus servicios.</p>
+        <p>La versión vigente estará disponible permanentemente en Autoconsumo.mx. Cuando una modificación requiera nuevamente el consentimiento del titular, éste será solicitado antes de utilizar sus datos conforme a las nuevas condiciones.</p>
+
+        <h4>Consentimiento</h4>
+        <p>Al marcar la casilla y enviar el formulario, el usuario declara que ha leído y aceptado este Aviso de Privacidad, que desea suscribirse a Autoconsumo.mx y que autoriza el tratamiento de sus datos para recibir su Autocheck y las comunicaciones de Fuel Experts relacionadas con autoconsumo.</p>
+      </div>
+      <div class="modal-pie">
+        <button type="button" class="btn-siguiente" id="btn-aceptar-desde-modal">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pantalla-otp" id="pantalla-otp">
+    <div class="icono" aria-hidden="true">✉</div>
+    <h1>Verifica tu correo</h1>
+    <p class="subtitulo">Te enviamos un código de acceso a <strong id="otp-correo-mostrado"></strong>. Escríbelo para continuar con tu autocheck.</p>
+    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="otp-input" id="otp-input" placeholder="········" autocomplete="one-time-code">
+    <p id="otp-mensaje" class="mensaje" role="status" aria-live="polite"></p>
+    <div class="botones">
+      <button type="button" class="btn-enviar" id="btn-otp-verificar">Verificar código</button>
+    </div>
+    <div class="otp-acciones">
+      <button type="button" class="otp-reenviar" id="btn-otp-reenviar">Reenviar código</button>
+      <button type="button" class="otp-corregir" id="btn-otp-corregir">¿Correo incorrecto? Corregirlo</button>
+    </div>
+  </div>
+
+  <div class="pantalla-resultado" id="pantalla-resultado">
+    <div id="resultado-contenido"></div>
+  </div>
+
+  <p class="pie-marca">POWERED BY REGNAUTILUS<br>FUEL EXPERTS S DE RL DE CV</p>
+  <p class="pie-beta">Versión BETA-TEST (la IA puede cometer errores — estamos mejorando continuamente este servicio para ti).</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // -----------------------------------------------------------------
+  // CONFIGURA AQUÍ tu proyecto de Supabase antes de publicar el formulario.
+  // Project Settings > API. La "anon key" es pública y segura de usar aquí
+  // siempre que la tabla tenga Row Level Security activado
+  // (ver supabase_setup.sql).
+  // -----------------------------------------------------------------
+  const SUPABASE_URL = 'https://qdelfelmvwnehyzfzrav.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZWxmZWxtdnduZWh5emZ6cmF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MzY2MDgsImV4cCI6MjEwNTIxMjYwOH0.tkQjlTAMEaFi7tuAs305ZQT4E7kC9A9a0VaeMEL_8PA';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // -----------------------------------------------------------------
+  // CONFIG de "siguientes pasos" — ligas y precios de los CTA que
+  // aparecen según el resultado del autocheck (ver autocheck ideas.pdf).
+  // urlAgendarCita (HubSpot Meetings) y urlAsistenciaPersonalizada
+  // (HubSpot Payment Link, respaldado por Stripe) ya son ligas reales.
+  // Solo urlPrecheck sigue siendo PLACEHOLDER (mailto:) hasta que
+  // Alfredo confirme la liga de cobro del precheck.
+  // -----------------------------------------------------------------
+  const CONFIG_SIGUIENTES_PASOS = {
+    urlAgendarCita: 'https://meetings.hubspot.com/autoconsumo/registro_cne',
+    // TODO(Alfredo): reemplaza por tu liga real de compra del precheck ($9,499 MXN/año).
+    urlPrecheck: 'mailto:contacto@mail.autoconsumo.mx?subject=' + encodeURIComponent('Me interesa el precheck ($9,499 MXN/año) — resultado de mi Autocheck'),
+    urlAsistenciaPersonalizada: 'https://payments-na1.hubspot.com/payments/9XQrvkQHJGqY6?referrer=PAYMENT_LINK',
+    urlRegistroCne: 'https://registroautoconsumo.cne.gob.mx/',
+  };
+
+  function determinarTierResultado(alertasRojas, alertasAmarillas, porcentajePuntaje) {
+    if (alertasRojas.length > 0) return 'critico';
+    if (alertasAmarillas.length > 0) return 'atencion';
+    if (porcentajePuntaje > 70) return 'listo';
+    return 'atencion';
+  }
+
+  async function registrarInteresCta(leadId, tipo) {
+    if (!leadId) return;
+    try {
+      await supabaseClient.rpc('marcar_interes_cta', { p_id: leadId, p_tipo: tipo });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Límite de autochecks gratuitos — solo informativo por ahora (el botón de upgrade
+  // está deshabilitado, "Autocheck-Plus" todavía no existe como producto para comprar).
+  const LIMITE_AUTOCHECKS_GRATIS = 3;
+
+  async function mostrarBannerLimiteGratis() {
+    const texto = document.getElementById('banner-limite-texto');
+    texto.textContent = 'Cargando tu uso de autochecks…';
+    try {
+      const { data, error } = await supabaseClient.rpc('contar_autochecks_usuario');
+      if (error) throw error;
+      const usados = typeof data === 'number' ? data : 0;
+      texto.textContent = `Has utilizado ${usados} de tus ${LIMITE_AUTOCHECKS_GRATIS} autochecks gratuitos.`;
+    } catch (e) {
+      console.error(e);
+      texto.textContent = `Autochecks gratuitos: hasta ${LIMITE_AUTOCHECKS_GRATIS}.`;
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // Texto declarativo para la caja verde "Fortalezas y checks" — se muestra cuando
+  // la respuesta a esa pregunta es la que NO resta/mejor puntúa (ver PUNTOS más abajo).
+  const FORTALEZAS_TEXTO = {
+    tiene_permiso: 'No tienes permiso SENER-CRE-CNE vigente (elegible para este registro).',
+    tiene_mia: 'Tienes Informe Preventivo o Manifestación de Impacto Ambiental vigente.',
+    compra_2025: 'Compraste y facturaste combustible en 2025.',
+    compra_2026: 'Compraste y facturaste combustible en 2026.',
+    tres_facturas: 'Tienes al menos tres facturas de combustible de este año.',
+    permiso_distribuidor: 'Conoces el número de permiso de tu distribuidor de combustible.',
+    surte_propios: 'Solo surtes combustible a vehículos de tu propia empresa.',
+    relacion_vehiculos: 'Tienes una relación exacta de tus vehículos.',
+    titulo_predio: 'Tienes título de propiedad o contrato del predio.',
+    inspeccion_asea: 'No has tenido inspecciones de la ASEA.',
+    inspeccion_cne: 'No has tenido inspecciones de la CNE.',
+    inspeccion_fiscalia: 'No has tenido inspecciones de la Fiscalía, el MP o la GN.',
+    clausura_sancion: 'No tienes procedimientos de clausura o sanción.',
+    controles_volumetricos: 'Reportas tus controles volumétricos al SAT.',
+    tiene_planos: 'Tienes planos de la instalación.',
+    factura_tanque: 'Tienes factura o garantía del tanque.',
+    solicitud_previa: 'No tienes solicitudes de permiso previas pendientes de resolver.',
+    permiso_negado: 'No te han negado un permiso antes.',
+    interes_permiso: 'Tienes interés en gestionar un permiso definitivo.',
+    operando: 'Tu instalación está en operación.',
+  };
+
+  // Texto declarativo del PROBLEMA real detrás de cada alerta (roja/amarilla) — se antepone,
+  // en negritas, al texto de la alerta tanto en pantalla como en los reportes (correo/PDF).
+  // Las llaves coinciden con los mismos nombres de campo que FORTALEZAS_TEXTO.
+  const PROBLEMA_TEXTO = {
+    tiene_permiso: 'Ya cuentas con un permiso vigente (SENER, CRE o CNE), lo cual hace que esta instalación no sea elegible para el registro de autoconsumo.',
+    titulo_predio: 'No cuentas con un título de propiedad o contrato que acredite el uso legal del predio.',
+    tiene_planos: 'No cuentas con planos de la instalación.',
+    factura_tanque: 'No cuentas con factura o garantía del tanque y las instalaciones.',
+    tres_facturas: 'No cuentas con al menos tres facturas de combustible de este año.',
+    permiso_distribuidor: 'No cuentas con el número de permiso de tu distribuidor de combustible.',
+    controles_volumetricos: 'No estás reportando tus controles volumétricos al SAT.',
+    surte_propios: 'Surtes combustible a vehículos que no son de tu propia empresa.',
+    relacion_vehiculos: 'No tienes una relación exacta de los vehículos que abastece la instalación.',
+    operando: 'La instalación no se encuentra operando actualmente.',
+    inspeccion_asea: 'Has recibido visitas o inspecciones de la ASEA.',
+    inspeccion_cne: 'Has recibido visitas o inspecciones de la CNE.',
+    inspeccion_fiscalia: 'Has recibido visitas o inspecciones de la Fiscalía, el Ministerio Público o la Guardia Nacional.',
+    clausura_sancion: 'La instalación está bajo un procedimiento de clausura o sanción.',
+    solicitud_previa: 'Has presentado solicitudes de permiso ante la CRE o CNE que quedaron pendientes o no se resolvieron favorablemente.',
+    permiso_negado: 'Te han negado permisos o autorizaciones respecto de esta instalación en el pasado.',
+    interes_permiso: 'No tienes interés en gestionar un permiso definitivo después del registro.',
+  };
+
+  // Relaciona el id de cada <div class="alerta"> con el nombre de campo usado en PROBLEMA_TEXTO
+  // (los ids no siempre siguen el mismo patrón que el name= del campo, p.ej. "alerta-planos" -> "tiene_planos").
+  const ALERTA_ID_A_CAMPO = {
+    'alerta-tiene-permiso': 'tiene_permiso',
+    'alerta-titulo-predio': 'titulo_predio',
+    'alerta-planos': 'tiene_planos',
+    'alerta-factura-tanque': 'factura_tanque',
+    'alerta-tres-facturas': 'tres_facturas',
+    'alerta-permiso-distribuidor': 'permiso_distribuidor',
+    'alerta-controles-volumetricos': 'controles_volumetricos',
+    'alerta-surte-propios': 'surte_propios',
+    'alerta-relacion-vehiculos': 'relacion_vehiculos',
+    'alerta-operando': 'operando',
+    'alerta-inspeccion-asea': 'inspeccion_asea',
+    'alerta-inspeccion-cne': 'inspeccion_cne',
+    'alerta-inspeccion-fiscalia': 'inspeccion_fiscalia',
+    'alerta-clausura-sancion': 'clausura_sancion',
+    'alerta-solicitud-previa': 'solicitud_previa',
+    'alerta-permiso-negado': 'permiso_negado',
+    'alerta-interes-permiso': 'interes_permiso',
+  };
+
+  // Antepone (sin escapar todavía) el texto del problema real al texto de la alerta.
+  // Se usa tanto para pintar los <li> en pantalla como para las cadenas que se mandan
+  // a la función de Supabase (alertas_rojas / alertas_amarillas), que alimentan el PDF.
+  function textoAlertaConProblema(el) {
+    const texto = el.textContent.trim();
+    const campo = ALERTA_ID_A_CAMPO[el.id];
+    const problema = campo ? PROBLEMA_TEXTO[campo] : null;
+    if (problema) return `${problema} ${texto}`;
+    return `Punto a revisar: ${texto}`;
+  }
+
+  // Pantalla de resultado — construye todo el contenido de #resultado-contenido
+  // (medidor tipo dona, pill de estatus, conteos, Tus Datos, cajas de crítico/
+  // atención/fortalezas, y el CTA único "Agenda una consulta").
+  function renderResultadoCompleto(cfg) {
+    const {
+      contenedor, porcentaje, elegibleRegistro, tier, elementosAlerta,
+      fortalezas, datosLista, mensajeNivel, nombrePila, leadId, tipoCta,
+    } = cfg;
+
+    let pill;
+    if (!elegibleRegistro) {
+      pill = { color: 'var(--rojo)', icono: '✕', texto: 'REGISTRO NO VIABLE POR AHORA' };
+    } else if (tier === 'critico') {
+      pill = { color: 'var(--rojo)', icono: '!', texto: 'TIENES PUNTOS CRÍTICOS QUE ATENDER' };
+    } else if (tier === 'atencion') {
+      pill = { color: 'var(--status-warning-accent)', icono: '!', texto: 'TIENES PUNTOS A REVISAR' };
+    } else {
+      pill = { color: 'var(--status-good)', icono: '✓', texto: 'ESTÁS EN CONDICIONES DEL REGISTRO' };
+    }
+
+    const rojas = elementosAlerta.filter(el => el.classList.contains('roja'));
+    const amarillas = elementosAlerta.filter(el => !el.classList.contains('roja'));
+
+    const construirLiCaja = (el) => {
+      const campoAlerta = ALERTA_ID_A_CAMPO[el.id];
+      const problema = campoAlerta ? PROBLEMA_TEXTO[campoAlerta] : null;
+      const textoAlerta = escapeHtml(el.textContent.trim());
+      if (problema) {
+        return `<li><strong>${escapeHtml(problema)}</strong> ${textoAlerta}</li>`;
+      }
+      return `<li><strong>Punto a revisar:</strong> ${textoAlerta}</li>`;
+    };
+
+    const pctRedondeado = Math.round(porcentaje);
+
+    contenedor.innerHTML = `
+      <p class="resultado-eyebrow">RESULTADO</p>
+      <h1 class="resultado-titulo-score">TU SCORE</h1>
+      <div class="gauge-wrap">
+        <div class="gauge-arco" style="--pct:${pctRedondeado}; --gauge-color:${pill.color};"></div>
+        <div class="gauge-numero" style="color:${pill.color};">${pctRedondeado}%</div>
+      </div>
+      <div class="resultado-pill" style="background:color-mix(in srgb, ${pill.color} 14%, transparent); color:${pill.color}">
+        <span class="pill-icono" style="background:${pill.color}">${pill.icono}</span>
+        ${pill.texto}
+      </div>
+      ${(amarillas.length > 0 || rojas.length > 0) ? `
+      <div class="resultado-conteos">
+        ${amarillas.length > 0 ? `<div class="resultado-conteo amarillo"><span class="punto"></span><strong>⚠️ Tienes ${amarillas.length} Aviso${amarillas.length > 1 ? 's' : ''} y Advertencia${amarillas.length > 1 ? 's' : ''}</strong></div>` : ''}
+        ${rojas.length > 0 ? `<div class="resultado-conteo rojo"><span class="punto"></span><strong>🚩 Tienes ${rojas.length} punto${rojas.length > 1 ? 's' : ''} crítico${rojas.length > 1 ? 's' : ''} que puede${rojas.length > 1 ? 'n' : ''} impedir un registro exitoso</strong></div>` : ''}
+      </div>` : ''}
+
+      <hr class="resultado-divisor">
+
+      <div class="resultado-seccion resultado-datos-caja">
+        <h3>Tus Datos:</h3>
+        <ul class="resultado-datos-lista">${datosLista.join('')}</ul>
+      </div>
+
+      <hr class="resultado-divisor">
+
+      ${rojas.length > 0 ? `
+      <div class="resultado-caja critico">
+        <p class="resultado-caja-titulo">⚠ PUNTOS CRÍTICOS</p>
+        <p class="resultado-caja-nota">Pueden impedir el registro exitoso y tener consecuencias negativas.</p>
+        <ul>${rojas.map(construirLiCaja).join('')}</ul>
+      </div>` : ''}
+
+      ${amarillas.length > 0 ? `
+      <div class="resultado-caja atencion">
+        <p class="resultado-caja-titulo">! AVISOS Y ADVERTENCIAS</p>
+        <p class="resultado-caja-nota">Puntos a revisar antes del registro.</p>
+        <ul>${amarillas.map(construirLiCaja).join('')}</ul>
+      </div>` : ''}
+
+      ${fortalezas.length > 0 ? `
+      <div class="resultado-caja fortalezas">
+        <p class="resultado-caja-titulo">✓ FORTALEZAS Y CHECKS</p>
+        <p class="resultado-caja-nota">Puntos listos para el registro.</p>
+        <ul>${fortalezas.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>
+      </div>` : ''}
+
+      <p class="resultado-envio">Hemos enviado este score a tu correo electrónico.</p>
+
+      <p class="resultado-mensaje-nivel">${nombrePila ? `<strong>${escapeHtml(nombrePila)}:</strong> ` : ''}${escapeHtml(mensajeNivel)}</p>
+      <p class="resultado-pregunta-consulta">¿Quieres asesoría especializada?</p>
+      <button type="button" class="btn-agendar-consulta" id="btn-agendar-consulta">AGENDA UNA CONSULTA</button>
+    `;
+
+    document.getElementById('btn-agendar-consulta').addEventListener('click', () => {
+      registrarInteresCta(leadId, tipoCta);
+      window.open(CONFIG_SIGUIENTES_PASOS.urlAgendarCita, '_blank', 'noopener');
+    });
+  }
+
+  const ESTADOS = [
+    "Aguascalientes","Baja California","Baja California Sur","Campeche","Chiapas",
+    "Chihuahua","Ciudad de México","Coahuila","Colima","Durango","Estado de México",
+    "Guanajuato","Guerrero","Hidalgo","Jalisco","Michoacán","Morelos","Nayarit",
+    "Nuevo León","Oaxaca","Puebla","Querétaro","Quintana Roo","San Luis Potosí",
+    "Sinaloa","Sonora","Tabasco","Tamaulipas","Tlaxcala","Veracruz","Yucatán","Zacatecas"
+  ];
+  const selectEstado = document.getElementById('estado');
+  ESTADOS.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e; opt.textContent = e;
+    selectEstado.appendChild(opt);
+  });
+
+  const pasos = Array.from(document.querySelectorAll('.paso'));
+  let pasoActual = 0;
+  const btnSiguiente = document.getElementById('btn-siguiente');
+  const btnAtras = document.getElementById('btn-atras');
+  const btnEnviar = document.getElementById('btn-enviar');
+  const progresoRelleno = document.getElementById('progreso-relleno');
+  const progresoTexto = document.getElementById('progreso-texto');
+  const stepperNumerado = document.getElementById('stepper-numerado');
+  const portada = document.getElementById('portada');
+  const pantallaAcceso = document.getElementById('pantalla-acceso');
+  const contenedorPrincipal = document.getElementById('contenedor-principal');
+
+  // --- Portada: elegir entre suscribirse (nuevo) o entrar directo (suscriptor existente) ---
+  document.getElementById('btn-ir-suscribir').addEventListener('click', () => {
+    portada.style.display = 'none';
+    contenedorPrincipal.style.display = 'block';
+    document.querySelector('.progreso-wrap').style.display = 'block';
+    formulario.style.display = 'block';
+    pasoActual = 0;
+    mostrarPaso(pasoActual);
+  });
+
+  document.getElementById('btn-ir-acceso').addEventListener('click', () => {
+    portada.style.display = 'none';
+    contenedorPrincipal.style.display = 'block';
+    pantallaAcceso.style.display = 'block';
+    reiniciarPantallaAcceso();
+    document.getElementById('acceso-correo').focus();
+  });
+
+  // Cantidad de pasos "reales" del cuestionario (excluye el paso 1, "Datos de tu
+  // suscripción", que es un pre-paso sin numerar — ver mostrarPaso/actualizarProgreso).
+  function totalPasosReales() {
+    return pasos.length - 1;
+  }
+
+  // Construye la barra de pasos numerados (1, 2, 3…) conectados por una línea.
+  // Los pasos ya completados se pintan con el acento cálido; el paso actual se resalta en naranja.
+  function construirStepperNumerado() {
+    const total = totalPasosReales();
+    let html = '';
+    for (let i = 1; i <= total; i++) {
+      const estado = i < pasoActual ? 'completado' : (i === pasoActual ? 'actual' : '');
+      html += `<div class="stepper-paso ${estado}"><div class="stepper-circulo">${i}</div>${i < total ? '<div class="stepper-linea"></div>' : ''}</div>`;
+    }
+    stepperNumerado.innerHTML = html;
+  }
+
+  function actualizarProgreso() {
+    const progresoWrap = document.querySelector('.progreso-wrap');
+    if (pasoActual === 0) {
+      // Pre-paso ("Datos de tu suscripción"): no se numera y no se muestra la barra/stepper.
+      progresoWrap.style.display = 'none';
+    } else {
+      progresoWrap.style.display = 'block';
+      const total = totalPasosReales();
+      progresoRelleno.style.width = (pasoActual / total * 100) + '%';
+      progresoTexto.textContent = `Paso ${pasoActual} de ${total}`;
+      construirStepperNumerado();
+    }
+    btnAtras.style.display = pasoActual === 0 ? 'none' : 'block';
+    btnSiguiente.style.display = pasoActual === pasos.length - 1 ? 'none' : 'block';
+    btnEnviar.style.display = pasoActual === pasos.length - 1 ? 'block' : 'none';
+  }
+
+  function mostrarPaso(indice) {
+    pasos.forEach((p, i) => p.classList.toggle('activo', i === indice));
+    actualizarProgreso();
+    document.getElementById('banner-limite-gratis').classList.toggle('mostrar', indice >= 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function pasoValido(indice) {
+    const paso = pasos[indice];
+    const requeridos = paso.querySelectorAll('input[required], select[required]');
+    for (const campo of requeridos) {
+      if (campo.type === 'checkbox') {
+        if (!campo.checked) return false;
+      } else if (!campo.value || !campo.value.trim()) {
+        return false;
+      }
+    }
+    // grupos de radio requeridos (todo radio dentro del paso se considera requerido)
+    const nombresRadio = new Set(Array.from(paso.querySelectorAll('input[type="radio"]')).map(r => r.name));
+    for (const nombre of nombresRadio) {
+      if (!paso.querySelector(`input[name="${nombre}"]:checked`)) return false;
+    }
+    // combustible: al menos uno marcado
+    if (paso.querySelector('input[name="combustible"]') &&
+        !paso.querySelector('input[name="combustible"]:checked')) return false;
+    // capacidad de tanques dinámicos
+    const capacidades = paso.querySelectorAll('.capacidad-tanque');
+    for (const c of capacidades) {
+      if (!c.value) return false;
+    }
+    // mínimo un tanque por cada combustible declarado
+    const combustiblesPaso = paso.querySelectorAll('input[name="combustible"]:checked').length;
+    if (combustiblesPaso > 0) {
+      const numTanquesPaso = parseInt(document.getElementById('cantidad_tanques').value, 10) || 0;
+      if (numTanquesPaso < combustiblesPaso) return false;
+    }
+    return true;
+  }
+
+  btnSiguiente.addEventListener('click', async () => {
+    if (!pasoValido(pasoActual)) {
+      document.getElementById('mensaje').textContent = 'Completa todos los campos requeridos antes de continuar.';
+      document.getElementById('mensaje').classList.add('error');
+      return;
+    }
+    document.getElementById('mensaje').textContent = '';
+
+    // Al terminar el paso 1 (datos generales), verificamos el correo por OTP antes de continuar.
+    if (pasoActual === 0 && !correoYaVerificado) {
+      const correo = document.getElementById('correo').value.trim();
+      const metadata = {
+        empresa: document.getElementById('empresa').value.trim(),
+        nombre_contacto: document.getElementById('nombre_contacto').value.trim(),
+        whatsapp: document.getElementById('whatsapp').value.trim(),
+      };
+      flujoActual = 'suscripcion';
+      btnSiguiente.disabled = true;
+      btnSiguiente.textContent = 'Enviando código...';
+      const error = await enviarCodigoOtp(correo, true, metadata);
+      btnSiguiente.disabled = false;
+      btnSiguiente.textContent = 'Siguiente';
+      if (error) {
+        console.error(error);
+        if (esErrorRateLimit(error)) {
+          document.getElementById('mensaje').textContent = 'Enviamos demasiadas solicitudes en poco tiempo. Espera unos minutos e inténtalo de nuevo.';
+        } else {
+          document.getElementById('mensaje').textContent = 'No pudimos enviar el código a ese correo. Verifica que esté bien escrito e intenta de nuevo.';
+        }
+        document.getElementById('mensaje').classList.add('error');
+        return;
+      }
+      mostrarPantallaOtp(correo);
+      return;
+    }
+
+    if (pasoActual < pasos.length - 1) {
+      pasoActual++;
+      mostrarPaso(pasoActual);
+    }
+  });
+
+  // --- Verificación de correo por OTP (evita leads de spam) ---
+  let correoYaVerificado = false;
+  let cooldownReenvio = 0;
+  let cooldownTimer = null;
+  let flujoActual = null; // 'suscripcion' (nuevo) | 'acceso' (suscriptor existente)
+  let correoParaOtp = '';
+
+  const pantallaOtp = document.getElementById('pantalla-otp');
+  const otpInput = document.getElementById('otp-input');
+  const otpMensaje = document.getElementById('otp-mensaje');
+  const otpCorreoMostrado = document.getElementById('otp-correo-mostrado');
+  const btnOtpVerificar = document.getElementById('btn-otp-verificar');
+  const btnOtpReenviar = document.getElementById('btn-otp-reenviar');
+  const btnOtpCorregir = document.getElementById('btn-otp-corregir');
+
+  // Detecta si un error de Supabase Auth es por rate-limit de envío de correos
+  // (para no mostrar el mensaje genérico de "no encontramos suscripción", que es engañoso aquí).
+  function esErrorRateLimit(error) {
+    return !!error && (error.status === 429 || error.code === 'over_email_send_rate_limit');
+  }
+
+  function iniciarCooldownReenvio(segundos) {
+    cooldownReenvio = segundos;
+    btnOtpReenviar.disabled = true;
+    clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      cooldownReenvio--;
+      if (cooldownReenvio <= 0) {
+        clearInterval(cooldownTimer);
+        btnOtpReenviar.disabled = false;
+        btnOtpReenviar.textContent = 'Reenviar código';
+      } else {
+        btnOtpReenviar.textContent = `Reenviar código (${cooldownReenvio}s)`;
+      }
+    }, 1000);
+  }
+
+  async function enviarCodigoOtp(correo, shouldCreateUser, metadata) {
+    const options = { shouldCreateUser };
+    if (metadata) options.data = metadata;
+    const { error } = await supabaseClient.auth.signInWithOtp({ email: correo, options });
+    return error;
+  }
+
+  function mostrarPantallaOtp(correo) {
+    correoParaOtp = correo;
+    otpCorreoMostrado.textContent = correo;
+    otpMensaje.textContent = '';
+    otpMensaje.classList.remove('error');
+    otpInput.value = '';
+    portada.style.display = 'none';
+    pantallaAcceso.style.display = 'none';
+    document.querySelector('.progreso-wrap').style.display = 'none';
+    formulario.style.display = 'none';
+    pantallaOtp.style.display = 'block';
+    otpInput.focus();
+    iniciarCooldownReenvio(60);
+  }
+
+  // --- Acceso directo (suscriptor existente): solo pide correo y salta al cuestionario ---
+  // Si el correo no existe como suscriptor, en vez de dejar que sigan picando "Enviar código"
+  // (lo que dispara un signInWithOtp de más cada vez y gasta cuota de Supabase para nada),
+  // el botón se convierte en "Quiero suscribirme" y los manda directo al alta con el correo
+  // ya prellenado.
+  const btnAccesoEnviar = document.getElementById('btn-acceso-enviar');
+  const accesoCorreoInput = document.getElementById('acceso-correo');
+  const accesoMensajeEl = document.getElementById('acceso-mensaje');
+  let accesoCorreoNoEncontrado = false;
+
+  function reiniciarPantallaAcceso() {
+    accesoCorreoNoEncontrado = false;
+    btnAccesoEnviar.textContent = 'Enviar código';
+    accesoMensajeEl.textContent = '';
+    accesoMensajeEl.classList.remove('error');
+  }
+
+  accesoCorreoInput.addEventListener('input', () => {
+    if (accesoCorreoNoEncontrado) reiniciarPantallaAcceso();
+  });
+
+  function irASuscripcionDesdeAcceso(correoPrellenado) {
+    pantallaAcceso.style.display = 'none';
+    document.querySelector('.progreso-wrap').style.display = 'block';
+    formulario.style.display = 'block';
+    document.getElementById('correo').value = correoPrellenado || '';
+    pasoActual = 0;
+    mostrarPaso(pasoActual);
+    document.getElementById('empresa').focus();
+  }
+
+  btnAccesoEnviar.addEventListener('click', async () => {
+    const correo = accesoCorreoInput.value.trim();
+    accesoMensajeEl.textContent = '';
+    accesoMensajeEl.classList.remove('error');
+    if (!correo) {
+      accesoMensajeEl.textContent = 'Escribe tu correo para continuar.';
+      accesoMensajeEl.classList.add('error');
+      return;
+    }
+
+    // Segundo clic con el mismo correo no encontrado: en vez de reintentar el envío
+    // del código (que ya sabemos que va a fallar), lo mandamos a suscribirse.
+    if (accesoCorreoNoEncontrado) {
+      accesoCorreoNoEncontrado = false;
+      irASuscripcionDesdeAcceso(correo);
+      return;
+    }
+
+    flujoActual = 'acceso';
+    btnAccesoEnviar.disabled = true;
+    btnAccesoEnviar.textContent = 'Enviando código...';
+    const error = await enviarCodigoOtp(correo, false);
+    btnAccesoEnviar.disabled = false;
+    if (error) {
+      console.error(error);
+      if (esErrorRateLimit(error)) {
+        accesoMensajeEl.textContent = 'Enviamos demasiadas solicitudes en poco tiempo. Espera unos minutos e inténtalo de nuevo.';
+        accesoMensajeEl.classList.add('error');
+        btnAccesoEnviar.textContent = 'Enviar código';
+        return;
+      }
+      accesoMensajeEl.textContent = 'No encontramos una suscripción activa con ese correo.';
+      accesoMensajeEl.classList.add('error');
+      accesoCorreoNoEncontrado = true;
+      btnAccesoEnviar.textContent = 'Quiero suscribirme';
+      return;
+    }
+    btnAccesoEnviar.textContent = 'Enviar código';
+    mostrarPantallaOtp(correo);
+  });
+
+  async function verificarOtp() {
+    const correo = correoParaOtp;
+    const codigo = otpInput.value.trim();
+    if (codigo.length !== 8) {
+      otpMensaje.textContent = 'El código son 8 dígitos.';
+      otpMensaje.classList.add('error');
+      return;
+    }
+    btnOtpVerificar.disabled = true;
+    btnOtpVerificar.textContent = 'Verificando...';
+    otpMensaje.textContent = '';
+    otpMensaje.classList.remove('error');
+
+    const { data, error } = await supabaseClient.auth.verifyOtp({ email: correo, token: codigo, type: 'email' });
+
+    btnOtpVerificar.disabled = false;
+    btnOtpVerificar.textContent = 'Verificar código';
+
+    if (error) {
+      console.error(error);
+      otpMensaje.textContent = 'Código incorrecto o vencido. Revisa tu correo o pide uno nuevo.';
+      otpMensaje.classList.add('error');
+      return;
+    }
+
+    correoYaVerificado = true;
+    clearInterval(cooldownTimer);
+    pantallaOtp.style.display = 'none';
+    document.querySelector('.progreso-wrap').style.display = 'block';
+    formulario.style.display = 'block';
+    mostrarBannerLimiteGratis();
+
+    if (flujoActual === 'acceso') {
+      // Suscriptor existente: precargamos sus datos guardados y saltamos directo al paso 2
+      const meta = (data && data.user && data.user.user_metadata) || {};
+      document.getElementById('correo').value = correo;
+      if (meta.empresa) document.getElementById('empresa').value = meta.empresa;
+      if (meta.nombre_contacto) document.getElementById('nombre_contacto').value = meta.nombre_contacto;
+      if (meta.whatsapp) document.getElementById('whatsapp').value = meta.whatsapp;
+      document.getElementById('acepto-privacidad').checked = true;
+    }
+    pasoActual = 1;
+    mostrarPaso(pasoActual);
+  }
+
+  btnOtpVerificar.addEventListener('click', verificarOtp);
+  otpInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); verificarOtp(); } });
+  otpInput.addEventListener('input', () => { otpInput.value = otpInput.value.replace(/\D/g, '').slice(0, 8); });
+
+  btnOtpReenviar.addEventListener('click', async () => {
+    if (btnOtpReenviar.disabled) return;
+    const error = await enviarCodigoOtp(correoParaOtp, flujoActual !== 'acceso');
+    if (error) {
+      console.error(error);
+      if (esErrorRateLimit(error)) {
+        otpMensaje.textContent = 'Enviamos demasiadas solicitudes en poco tiempo. Espera unos minutos e inténtalo de nuevo.';
+      } else {
+        otpMensaje.textContent = 'No pudimos reenviar el código. Intenta de nuevo en un momento.';
+      }
+      otpMensaje.classList.add('error');
+      return;
+    }
+    otpMensaje.textContent = 'Te reenviamos el código.';
+    otpMensaje.classList.remove('error');
+    iniciarCooldownReenvio(60);
+  });
+
+  btnOtpCorregir.addEventListener('click', () => {
+    clearInterval(cooldownTimer);
+    pantallaOtp.style.display = 'none';
+    if (flujoActual === 'acceso') {
+      pantallaAcceso.style.display = 'block';
+      reiniciarPantallaAcceso();
+      document.getElementById('acceso-correo').value = correoParaOtp;
+      document.getElementById('acceso-correo').focus();
+    } else {
+      document.querySelector('.progreso-wrap').style.display = 'block';
+      formulario.style.display = 'block';
+      pasoActual = 0;
+      mostrarPaso(pasoActual);
+      document.getElementById('correo').focus();
+    }
+  });
+
+  btnAtras.addEventListener('click', () => {
+    if (pasoActual > 0) {
+      pasoActual--;
+      mostrarPaso(pasoActual);
+    }
+  });
+
+  // --- Alertas condicionales ---
+  function conectarAlerta(nombreCampo, valorQueDispara, idAlerta) {
+    const alerta = document.getElementById(idAlerta);
+    document.querySelectorAll(`input[name="${nombreCampo}"]`).forEach(input => {
+      input.addEventListener('change', () => {
+        const marcado = document.querySelector(`input[name="${nombreCampo}"]:checked`);
+        alerta.classList.toggle('mostrar', !!marcado && marcado.value === valorQueDispara);
+      });
+    });
+  }
+  conectarAlerta('tiene_permiso', 'si', 'alerta-tiene-permiso');
+  conectarAlerta('titulo_predio', 'no', 'alerta-titulo-predio');
+  conectarAlerta('tiene_planos', 'no', 'alerta-planos');
+  conectarAlerta('factura_tanque', 'no', 'alerta-factura-tanque');
+  conectarAlerta('tres_facturas', 'no', 'alerta-tres-facturas');
+  conectarAlerta('permiso_distribuidor', 'no', 'alerta-permiso-distribuidor');
+  conectarAlerta('controles_volumetricos', 'no', 'alerta-controles-volumetricos');
+  conectarAlerta('surte_propios', 'no', 'alerta-surte-propios');
+  conectarAlerta('relacion_vehiculos', 'no', 'alerta-relacion-vehiculos');
+  conectarAlerta('operando', 'no', 'alerta-operando');
+  conectarAlerta('inspeccion_asea', 'si', 'alerta-inspeccion-asea');
+  conectarAlerta('inspeccion_cne', 'si', 'alerta-inspeccion-cne');
+  conectarAlerta('inspeccion_fiscalia', 'si', 'alerta-inspeccion-fiscalia');
+  conectarAlerta('clausura_sancion', 'si', 'alerta-clausura-sancion');
+  conectarAlerta('solicitud_previa', 'si', 'alerta-solicitud-previa');
+  conectarAlerta('permiso_negado', 'si', 'alerta-permiso-negado');
+  conectarAlerta('interes_permiso', 'no', 'alerta-interes-permiso');
+
+  // Mostrar/ocultar checkboxes de "¿cuál permiso?" y controlar la alerta de tanques
+  document.querySelectorAll('input[name="tiene_permiso"]').forEach(input => {
+    input.addEventListener('change', () => {
+      document.getElementById('wrap-permisos-vigentes').style.display =
+        input.value === 'si' && input.checked ? 'block' : 'none';
+    });
+  });
+
+  const inputTanques = document.getElementById('cantidad_tanques');
+  const listaCapacidad = document.getElementById('lista-capacidad-tanques');
+  const alertaTanques = document.getElementById('alerta-tanques');
+
+  function regenerarCamposTanques() {
+    const n = parseInt(inputTanques.value, 10) || 0;
+    listaCapacidad.innerHTML = '';
+    if (n <= 0) {
+      listaCapacidad.innerHTML = '<p class="ayuda">Indica primero la cantidad de tanques.</p>';
+      return;
+    }
+    for (let i = 1; i <= n; i++) {
+      const fila = document.createElement('div');
+      fila.className = 'tanque-fila';
+      fila.innerHTML = `<span>Tanque ${i}</span>
+        <input type="number" class="capacidad-tanque" min="0" step="1" placeholder="Ej. 30000" required>`;
+      listaCapacidad.appendChild(fila);
+    }
+  }
+
+  function validarNumTanquesVsCombustibles() {
+    const n = parseInt(inputTanques.value, 10) || 0;
+    const numCombustibles = document.querySelectorAll('input[name="combustible"]:checked').length;
+    alertaTanques.classList.toggle('mostrar', numCombustibles > 1 && n < numCombustibles);
+  }
+
+  inputTanques.addEventListener('input', () => {
+    regenerarCamposTanques();
+    validarNumTanquesVsCombustibles();
+  });
+  document.querySelectorAll('input[name="combustible"]').forEach(cb => {
+    cb.addEventListener('change', validarNumTanquesVsCombustibles);
+  });
+
+  // --- Aviso de privacidad (modal) ---
+  const AVISO_PRIVACIDAD_VERSION = '2026-09-07';
+  const modalAviso = document.getElementById('modal-aviso');
+  function abrirModalAviso() { modalAviso.classList.add('mostrar'); }
+  function cerrarModalAviso() { modalAviso.classList.remove('mostrar'); }
+  document.getElementById('btn-ver-aviso').addEventListener('click', abrirModalAviso);
+  document.getElementById('btn-cerrar-aviso').addEventListener('click', cerrarModalAviso);
+  document.getElementById('btn-aceptar-desde-modal').addEventListener('click', cerrarModalAviso);
+  modalAviso.addEventListener('click', (e) => { if (e.target === modalAviso) cerrarModalAviso(); });
+
+  // --- Puntaje (score) ---
+  // Puntos por respuesta, según la tabla de Alfredo. "si"/"no" son los value= de cada radio.
+  const PUNTOS = {
+    tiene_permiso:          { si: 0,  no: 10 },
+    tiene_mia:              { si: 10, no: 5 },
+    compra_2025:            { si: 10, no: 5 },
+    compra_2026:            { si: 10, no: 0 },
+    tres_facturas:          { si: 10, no: 0 },
+    permiso_distribuidor:   { si: 10, no: -30 },
+    surte_propios:          { si: 10, no: -50 },
+    relacion_vehiculos:     { si: 10, no: 0 },
+    titulo_predio:          { si: 10, no: 5 },
+    inspeccion_asea:        { si: 5,  no: 10 },
+    inspeccion_cne:         { si: 5,  no: 10 },
+    inspeccion_fiscalia:    { si: 0,  no: 10 },
+    clausura_sancion:       { si: -30, no: 10 },
+    controles_volumetricos: { si: 10, no: 5 },
+    tiene_planos:           { si: 10, no: 5 },
+    factura_tanque:         { si: 10, no: 0 },
+    solicitud_previa:       { si: 5,  no: 10 },
+    permiso_negado:         { si: -10, no: 10 },
+    interes_permiso:        { si: 10, no: -30 },
+    operando:               { si: 10, no: -30 },
+  };
+  // 9 campos de datos/instalación otorgan 10 puntos fijos cada uno al estar respondidos
+  const PUNTOS_CAMPOS_FIJOS = 90;
+  const PUNTAJE_MAX = PUNTOS_CAMPOS_FIJOS + Object.values(PUNTOS).reduce((s, p) => s + Math.max(p.si, p.no), 0); // 290
+  const PUNTAJE_MIN = PUNTOS_CAMPOS_FIJOS + Object.values(PUNTOS).reduce((s, p) => s + Math.min(p.si, p.no), 0); // -50
+
+  function calcularPuntaje() {
+    let puntaje = PUNTOS_CAMPOS_FIJOS;
+    for (const nombreCampo in PUNTOS) {
+      const marcado = document.querySelector(`input[name="${nombreCampo}"]:checked`);
+      if (marcado) puntaje += PUNTOS[nombreCampo][marcado.value];
+    }
+    return puntaje;
+  }
+
+  // --- Envío ---
+  const formulario = document.getElementById('formulario-autocheck');
+  const mensaje = document.getElementById('mensaje');
+
+  formulario.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    if (!pasoValido(pasoActual)) {
+      mensaje.textContent = 'Completa todos los campos requeridos antes de enviar.';
+      mensaje.classList.add('error');
+      return;
+    }
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = 'Enviando...';
+    mensaje.textContent = '';
+
+    const val = (nombre) => {
+      const el = document.querySelector(`input[name="${nombre}"]:checked`);
+      return el ? el.value === 'si' : null;
+    };
+    const marcados = (nombre) => Array.from(document.querySelectorAll(`input[name="${nombre}"]:checked`)).map(i => i.value);
+    const capacidadTanques = Array.from(document.querySelectorAll('.capacidad-tanque')).map(i => Number(i.value));
+
+    const tienePermiso = val('tiene_permiso');
+    const surtePropios = val('surte_propios');
+    const operando = val('operando');
+    const tresFacturas = val('tres_facturas');
+    const tipoRegistro = document.querySelector('input[name="tipo_registro"]:checked')?.value || null;
+    const leadPlus = tipoRegistro === 'con_acompanamiento';
+
+    // Reglas que impiden gestionar el registro exitosamente
+    const elegibleRegistro = !(tienePermiso === true || surtePropios === false || operando === false);
+
+    // Alertas actualmente visibles en el formulario (todas las que se dispararon).
+    // Se usa textoAlertaConProblema para anteponer el problema real detrás de cada alerta
+    // — se ve en pantalla (construirLiCaja) y también viaja al correo/PDF vía la función de Supabase.
+    const alertasCriticas = Array.from(document.querySelectorAll('.alerta.mostrar')).map(a => textoAlertaConProblema(a));
+    const alertasRojas = Array.from(document.querySelectorAll('.alerta.roja.mostrar')).map(a => textoAlertaConProblema(a));
+    const alertasAmarillas = Array.from(document.querySelectorAll('.alerta.amarilla.mostrar')).map(a => textoAlertaConProblema(a));
+
+    const puntaje = calcularPuntaje();
+    const porcentajePuntaje = Math.max(0, Math.min(100, ((puntaje - PUNTAJE_MIN) / (PUNTAJE_MAX - PUNTAJE_MIN)) * 100));
+    const tierResultado = determinarTierResultado(alertasRojas, alertasAmarillas, porcentajePuntaje);
+    const leadId = (window.crypto && typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : null;
+
+    const registro = {
+      ...(leadId ? { id: leadId } : {}),
+      empresa: document.getElementById('empresa').value.trim(),
+      nombre_instalacion: document.getElementById('nombre_instalacion').value.trim() || null,
+      nombre_contacto: document.getElementById('nombre_contacto').value.trim(),
+      correo: document.getElementById('correo').value.trim(),
+      whatsapp: document.getElementById('whatsapp').value.trim(),
+      combustibles: marcados('combustible'),
+      cantidad_tanques: Number(inputTanques.value),
+      capacidad_tanques: capacidadTanques,
+      antiguedad_anios: Number(document.getElementById('antiguedad').value),
+      tiene_permiso: tienePermiso,
+      permisos_vigentes: tienePermiso ? marcados('permiso_vigente') : [],
+      tiene_informe_preventivo_mia: val('tiene_mia'),
+      compro_facturo_2025: val('compra_2025'),
+      compro_facturo_2026: val('compra_2026'),
+      tiene_3_facturas_anio: tresFacturas,
+      conoce_permiso_distribuidor: val('permiso_distribuidor'),
+      surte_solo_vehiculos_propios: surtePropios,
+      tiene_relacion_vehiculos: val('relacion_vehiculos'),
+      tiene_titulo_o_contrato_predio: val('titulo_predio'),
+      inspeccion_asea: val('inspeccion_asea'),
+      inspeccion_cne: val('inspeccion_cne'),
+      inspeccion_fiscalia_mp_gn: val('inspeccion_fiscalia'),
+      procedimiento_clausura_sancion: val('clausura_sancion'),
+      reporta_controles_volumetricos_sat: val('controles_volumetricos'),
+      estado: selectEstado.value,
+      tiene_planos: val('tiene_planos'),
+      tiene_factura_garantia_tanque: val('factura_tanque'),
+      solicito_permiso_antes: val('solicitud_previa'),
+      le_negaron_permiso_antes: val('permiso_negado'),
+      interes_gestionar_permiso: val('interes_permiso'),
+      instalacion_operando: operando,
+      tipo_registro: tipoRegistro,
+      lead_plus: leadPlus,
+      acepta_aviso_privacidad: document.getElementById('acepto-privacidad').checked,
+      aviso_privacidad_version: AVISO_PRIVACIDAD_VERSION,
+      alertas_criticas: alertasCriticas,
+      alertas_rojas: alertasRojas,
+      alertas_amarillas: alertasAmarillas,
+      tier_resultado: tierResultado,
+      elegible_registro: elegibleRegistro,
+      puntaje: puntaje,
+      puntaje_max: PUNTAJE_MAX,
+      porcentaje_puntaje: Math.round(porcentajePuntaje * 10) / 10,
+    };
+
+    const { error } = await supabaseClient.from('leads_autocheck_estaciones').insert([registro]);
+
+    if (error) {
+      console.error(error);
+      mensaje.textContent = 'Hubo un problema al enviar tu autocheck. Intenta de nuevo en un momento.';
+      mensaje.classList.add('error');
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = 'Enviar autocheck';
+      return;
+    }
+
+    formulario.style.display = 'none';
+    document.querySelector('.progreso-wrap').style.display = 'none';
+    const resultado = document.getElementById('pantalla-resultado');
+    resultado.classList.add(elegibleRegistro ? 'ok' : 'riesgo');
+
+    const elementosAlertaMostrados = Array.from(document.querySelectorAll('.alerta.mostrar'));
+
+    // Fortalezas: cada pregunta con puntaje cuya respuesta actual es la que mejor puntúa.
+    const fortalezas = [];
+    const combustiblesElegidos = marcados('combustible');
+    if (combustiblesElegidos.length > 0) {
+      fortalezas.push('Consumes/despachas ' + combustiblesElegidos.join(', ') + '.');
+    }
+    for (const campo in PUNTOS) {
+      const elMarcado = document.querySelector(`input[name="${campo}"]:checked`);
+      if (!elMarcado) continue;
+      const valorBueno = PUNTOS[campo].si >= PUNTOS[campo].no ? 'si' : 'no';
+      if (elMarcado.value === valorBueno && FORTALEZAS_TEXTO[campo]) {
+        fortalezas.push(FORTALEZAS_TEXTO[campo]);
+      }
+    }
+
+    // Envío del reporte PDF por correo (fire-and-forget: no bloquea la pantalla de resultado
+    // si el correo tarda o falla; el usuario ya ve su resultado en pantalla de inmediato).
+    supabaseClient.functions.invoke('enviar-reporte-autocheck', {
+      body: {
+        correo: registro.correo,
+        nombre_contacto: registro.nombre_contacto,
+        empresa: registro.empresa,
+        nombre_instalacion: registro.nombre_instalacion,
+        estado: registro.estado,
+        combustibles: registro.combustibles,
+        cantidad_tanques: registro.cantidad_tanques,
+        capacidad_tanques: registro.capacidad_tanques,
+        antiguedad_anios: registro.antiguedad_anios,
+        porcentaje_puntaje: registro.porcentaje_puntaje,
+        tier_resultado: registro.tier_resultado,
+        elegible_registro: registro.elegible_registro,
+        alertas_rojas: registro.alertas_rojas,
+        alertas_amarillas: registro.alertas_amarillas,
+        fortalezas: fortalezas,
+      },
+    }).catch((err) => console.error('No se pudo enviar el reporte por correo:', err));
+
+    // Tus Datos: resumen de lo capturado (escapado, ya que viene de campos libres).
+    const empresaSeg = escapeHtml(registro.empresa || '');
+    const instalacionSeg = escapeHtml(registro.nombre_instalacion || '');
+    const estadoSeg = escapeHtml(registro.estado || '');
+    const datosLista = [];
+    datosLista.push(`<li>Empresa: ${empresaSeg}</li>`);
+    datosLista.push(`<li>Instalación: ${instalacionSeg ? instalacionSeg + ' | ' : ''}${estadoSeg}</li>`);
+    if (registro.combustibles.length) {
+      datosLista.push(`<li>Combustible: ${escapeHtml(registro.combustibles.join(', '))}</li>`);
+    }
+    datosLista.push(`<li>${registro.cantidad_tanques} tanque(s) — capacidad: ${registro.capacidad_tanques.map(c => escapeHtml(String(c)) + ' L').join(', ')}</li>`);
+    datosLista.push(`<li>Antigüedad de la instalación: ${registro.antiguedad_anios} año(s)</li>`);
+
+    // Mensaje del nivel, ya SIN el saludo/nombre concatenado (ver nombrePila abajo, que ahora
+    // se manda por separado a renderResultadoCompleto para pintarse en negritas al inicio).
+    const nombrePila = registro.nombre_contacto ? registro.nombre_contacto.trim().split(/\s+/)[0] : '';
+    const instalacionNombre = registro.nombre_instalacion || registro.empresa || 'tu instalación';
+    let mensajeNivel;
+    let tipoCta;
+    if (!elegibleRegistro || tierResultado === 'critico') {
+      mensajeNivel = `la instalación ${instalacionNombre} presenta hallazgos que no parece recomendable ignorar — no es aconsejable ir al Registro sin atenderlos primero.`;
+      tipoCta = !elegibleRegistro ? 'agendar_cita_no_elegible' : 'agendar_cita_critico';
+    } else if (tierResultado === 'atencion') {
+      mensajeNivel = `la instalación ${instalacionNombre} presenta puntos a revisar y a considerar antes de ir al Registro.`;
+      tipoCta = 'agendar_cita_atencion';
+    } else {
+      mensajeNivel = `la instalación ${instalacionNombre} puede realizar su registro por su cuenta, o con nuestro acompañamiento.`;
+      tipoCta = 'agendar_cita_listo';
+    }
+
+    renderResultadoCompleto({
+      contenedor: document.getElementById('resultado-contenido'),
+      porcentaje: porcentajePuntaje,
+      elegibleRegistro,
+      tier: tierResultado,
+      elementosAlerta: elementosAlertaMostrados,
+      fortalezas,
+      datosLista,
+      mensajeNivel,
+      nombrePila,
+      leadId,
+      tipoCta,
+    });
+
+    resultado.style.display = 'block';
+  });
+
+</script>
+
+</body>
+</html>
