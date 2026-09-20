@@ -3,6 +3,44 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## ⏸️ Sesión pausada — 20-sep-2026 (sesión 7, primera en Claude Code) — Netlify conectado a GitHub, Auth arreglado, prueba end-to-end exitosa, bug de Vault y de color de medidor corregidos
+
+**Primera sesión de este proyecto en Claude Code** (el trabajo de código se mudó aquí desde Cowork por el bloqueo de push descrito al final de la sesión 6). Se retomó desde el primer commit subido manualmente a `https://github.com/autoconsumo-mx/autocheck`.
+
+### 1. Verificación de integridad del primer commit
+Se comparó `index.html` y la Edge Function contra lo documentado en la sesión 6 (stepper numerado, `PROBLEMA_TEXTO`/`FORTALEZAS_TEXTO`, OTP de 8 dígitos, color `#F6B72B`, remitente `autocheck@autoconsumo.mx`, iconos de escudo/pipa, sin logo pequeño) — **todo coincide, sin divergencias.**
+
+### 2. Netlify conectado al repo de GitHub — ✅ ya no es deploy manual
+Alfredo entró a **Project configuration → Link repository** dentro del sitio existente `autocheck-autoconsumo` (NO usó "Add new site", que hubiera creado un sitio duplicado con otro nombre y roto el dominio). Quedó conectado: cada push a `main` dispara deploy automático. Confirmado visualmente en el navegador (contenido del sitio en vivo coincide con el repo, sin errores de consola) y confirmado de nuevo más tarde en la sesión con un segundo push real (ver punto 5).
+
+### 3. Ajustes manuales de Supabase Auth — ✅ los tres completados
+1. **Site URL**: cambiado de `http://localhost:3000` a `https://autocheck.autoconsumo.mx` (Authentication → URL Configuration).
+2. **Redirect URLs**: se agregó `https://autocheck.autoconsumo.mx/**` (la lista estaba vacía antes — este era un hueco real, no solo el Site URL).
+3. **Custom SMTP vía Resend**: host `smtp.resend.com`, puerto `465`, username `resend` (dato importante: Supabase/el navegador autocompletó el username con `autocheck` por error — el username correcto para Resend SIEMPRE es el texto literal `resend`, sin importar la cuenta). La primera API key pegada como password también falló (error `535 Authentication credentials invalid`); se generó una nueva en Resend y funcionó. Esto resolvió de un solo golpe el rate limit del mailer default de Supabase y la personalización del remitente de los correos de Auth.
+
+### 4. Prueba end-to-end real completa — ✅ por fin hecha (llevaba pendiente desde sesión 4)
+Se hizo con el correo de prueba `op@energie.mx` (llevada a cabo por Claude vía el navegador integrado, con Alfredo pasando el código OTP recibido):
+- Suscripción nueva → correo pre-cargado, checkbox de Aviso de Privacidad → **Siguiente** → error inicial `500 Error sending magic link` (ver bug de SMTP arriba, ya resuelto en el momento) → tras corregir SMTP, OTP llegó correctamente.
+- OTP de 8 dígitos verificado → avanzó al wizard.
+- Wizard completo (7 pasos) llenado con datos de prueba variados → **Enviar autocheck** → pantalla de resultado renderizó correctamente (97%, 1 bandera roja real: *"No cuentas con al menos tres facturas de combustible de este año..."*, activada por responder "No" a esa pregunta del paso 4).
+- **Lead confirmado en la base de datos** (`leads_autocheck_estaciones`, id `58dbec48-069a-4a38-9aeb-6ad02070f7c9`): score 97.1%, `tier_resultado: critico`, `elegible_registro: true`, `lead_plus: true` (por elegir "Con acompañamiento" en el paso 7) — todo coincide con las respuestas dadas.
+- El envío automático del PDF por correo (fire-and-forget) **falló silenciosamente en el momento real del submit** — ver bug de Vault abajo.
+
+### 5. Bug real encontrado y corregido: API key de Resend inválida en el Vault de Supabase
+La Edge Function `enviar-reporte-autocheck` respondió `500` al invocarse durante la prueba real. El log de la función (vía `query_logs`, `source = 'function_logs'`) mostró la causa exacta: `Error: Resend respondió 401: {"message":"API key is invalid"}`. Esta es una key **distinta** a la del SMTP de Auth (arriba) — vive en `vault.secrets` (nombre `resend_api_key`, id `5cffcb3a-4bf7-482d-9fcf-d7e1516adace`, creada el 17-sep-2026 cuando se reconstruyó el proyecto, nunca actualizada desde entonces) y la lee la función `obtener_resend_api_key()`. Alfredo generó una nueva API key en Resend y se actualizó el secreto vía SQL (`select vault.update_secret(id, nueva_key)`). Se verificó el fix invocando la función manualmente dos veces desde la consola del navegador (con el `supabaseClient` ya autenticado en la página):
+1. Con datos sintéticos de prueba → `{"ok":true}`, correo recibido.
+2. Reenviado con la alerta roja **real** tomada de la fila en la base de datos (para no confundir a Alfredo con texto de prueba) → también exitoso.
+
+**Tip para futuras depuraciones:** la función acepta `preview: true` en el payload — regresa el PDF crudo (`Blob`, `application/pdf`) sin mandar correo. Sirve para decodificar y revisar el PDF directamente sin gastar envíos reales de Resend.
+
+### 6. Bug real encontrado y corregido: el medidor de score no coincidía entre el sitio web y el PDF
+Al revisar el PDF de prueba (page 1, `SCORE 97%`), se notó que el anillo del medidor siempre es color naranja de marca en el PDF (`NARANJA`/`NARANJA_OSCURO`, fijo, línea `index.ts:252`), y solo el pill de abajo cambia de color según el nivel (rojo/amarillo/verde). En cambio, el sitio web coloreaba **tanto el anillo como el número del %** según el tier (`--gauge-color:${pill.color}` en `renderResultadoCompleto`). **Alfredo confirmó explícitamente que el comportamiento correcto es el del PDF: el medidor debe verse igual siempre, solo el pill cambia de color.** Se corrigió `index.html` (el anillo ahora usa `var(--naranja)` fijo, el número usa `var(--naranja-oscuro)` fijo) — commit `b9bf0ec`, push a `main`, deploy automático verificado en vivo (`fetch('/index.html')` desde el sitio en producción confirmó la versión nueva servida).
+
+### Bug real encontrado, NO investigado a fondo — pendiente para otra sesión
+**`op@energie.mx` ya tenía 2 autochecks reales previos** en la tabla (18-sep-2026, bajo la empresa "energie" — aparentemente el correo de trabajo real de Alfredo, usado antes en pruebas), lo que debería significar que ya es un suscriptor. Sin embargo, al probar "acceso directo" (`shouldCreateUser:false`) con ese correo al inicio de esta sesión, el sitio respondió correctamente-pero-incorrectamente: *"No encontramos una suscripción activa con ese correo."* Esto forzó a usar el flujo de suscripción nueva en su lugar. **Posible bug:** la lógica de "acceso directo" podría estar chequeando algo distinto a "¿ya hizo un autocheck antes?" (quizás un estado de confirmación de cuenta en Supabase Auth, o una tabla de suscriptores separada de los leads). No se investigó la causa raíz esta sesión — queda para revisar cuándo se retome.
+
+---
+
 ## ⏸️ Sesión pausada — 18-sep-2026 (sesión 6) — batch grande de 39 fixes de Alfredo probando en vivo + 2 bugs reales de Auth + solicitud de GitHub
 
 Alfredo probó el sitio en vivo a fondo (portada, pantalla de acceso, pantalla de resultado, wizard, y el PDF/correo recibido) y fue mandando ~39 observaciones por chat con capturas de pantalla, con instrucción explícita de **no ejecutar nada hasta que él lo indicara** ("te voy pasando observaciones, anotalas y ejecutamos cuando te indique"). Al terminar, dio la orden ("ya no puedo hacer mas pruebas. Ejecuta") y a media ejecución agregó una petición nueva: dejar el proyecto con control de versiones en GitHub para eficientar el trabajo.
@@ -267,13 +305,16 @@ Flujo implementado:
 - Tabla `leads_autocheck_estaciones`, RLS activo.
 - El conector MCP de Supabase y de Netlify de Alfredo están enlazados a esta cuenta de Claude.
 - **18-sep-2026 (sesión 6): repo de GitHub creado — `https://github.com/autoconsumo-mx/autocheck` — ver sección arriba.**
+- **20-sep-2026 (sesión 7): repo conectado a Netlify (deploy automático); Site URL, Redirect URLs y Custom SMTP vía Resend corregidos en Authentication — ver sección de sesión 7 arriba.**
 
 ## Verificación por OTP (anti-spam)
 `supabase.auth.signInWithOtp(...)` → pantalla de código → `supabase.auth.verifyOtp({email, token, type:'email'})`. Reenvío con cooldown de 60s.
 
 **Longitud del OTP: 8 dígitos (decisión deliberada de Alfredo).** Supabase → Authentication → Sign In/Providers → Email → "Email OTP length" = 8.
 
-**Pendiente/no aplicado — plantilla "Confirm sign up":** cuando "Confirm email" está activo, Supabase manda el template "Confirm sign up" (solo link, sin código) en vez de "Magic link or OTP". La liga además trae `localhost` (ver bug real #1 de sesión 6) — mismo fix pendiente: Site URL + Custom SMTP.
+**Correos de Auth (OTP, etc.) ahora salen por Custom SMTP vía Resend (sesión 7, 20-sep-2026)** — host `smtp.resend.com`, username `resend` (texto literal, no derivado de la cuenta), remitente personalizado en vez del mailer default de Supabase. Esto resolvió el rate limit bajo del mailer default y permite personalizar subject/remitente en Authentication → Email Templates.
+
+**Pendiente/no aplicado — plantilla "Confirm sign up":** cuando "Confirm email" está activo, Supabase manda el template "Confirm sign up" (solo link, sin código) en vez de "Magic link or OTP". La liga traía `localhost` — **ya corregido en sesión 7** (Site URL + Redirect URLs + SMTP); falta decidir Opción A vs B para este flujo (ver "Pendiente").
 
 **RLS:** solo `authenticated` puede insertar en `leads_autocheck_estaciones`.
 
@@ -312,13 +353,13 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 - **Decisión de arquitectura de pagos:** HubSpot Payment Links (vía Stripe conectado) para precheck/asistencia (venta asistida); pasarela propia (Stripe + Mercado Pago) para lo que viva dentro del Autocheck mismo.
 
 ## Pendiente
-1. Subir a Netlify la versión más reciente de `index.html` (o conectar el repo de GitHub a Netlify para que sea automático).
-2. Ajustes manuales en Supabase Auth (`qdelfelmvwnehyzfzrav`): Site URL correcto + Custom SMTP vía Resend.
-3. Probar end-to-end limpio la función de envío de PDF/correo tras el fix de Site URL/SMTP.
+1. ~~Subir a Netlify la versión más reciente de `index.html` (o conectar el repo de GitHub a Netlify para que sea automático)~~ — ✅ hecho en sesión 7 (20-sep-2026): repo conectado, deploy automático en cada push a `main`, verificado en vivo dos veces.
+2. ~~Ajustes manuales en Supabase Auth (`qdelfelmvwnehyzfzrav`): Site URL correcto + Custom SMTP vía Resend~~ — ✅ hecho en sesión 7.
+3. ~~Probar end-to-end limpio la función de envío de PDF/correo tras el fix de Site URL/SMTP~~ — ✅ hecho en sesión 7 (correo de prueba `op@energie.mx`). De paso se encontró y corrigió una API key de Resend inválida en el Vault (independiente del SMTP) y se corrigió una inconsistencia de color entre el medidor del sitio y el del PDF — ver detalle en la sección de sesión 7 arriba.
 4. Decidir Opción A vs B para la plantilla "Confirm sign up".
 5. Confirmar que las franjas del medidor y los bloqueos duros reflejan lo que el equipo espera.
 6. Decidir si el equipo interno necesita ver las respuestas desde el portal (staff vs. leads).
-7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción.
+7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción. **Relacionado, nuevo hallazgo en sesión 7:** un correo (`op@energie.mx`) con 2 autochecks reales previos fue rechazado por "acceso directo" como si no fuera suscriptor — posible bug en la lógica de detección de suscriptor existente, sin investigar a fondo todavía.
 8. Construir la Edge Function que normalice webhooks de Stripe/Mercado Pago.
 9. Detallar la membresía "gold"/plus.
 10. Mostrarle a Alfredo la tabla de 7 etapas del pipeline "REGISTRO CNE" para aprobación.
@@ -327,7 +368,8 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 13. Confirmar con Alfredo si el CTA único reemplaza definitivamente a los tres botones anteriores.
 14. Decidir si vale la pena capturar combustible/antigüedad por tanque individual.
 15. Recuperar/consultar autochecks anteriores — decidido no construir todavía.
-16. ~~Crear/conectar el repositorio de GitHub del proyecto~~ — ✅ hecho en sesión 6; falta conectarlo a Netlify.
+16. ~~Crear/conectar el repositorio de GitHub del proyecto~~ — ✅ hecho en sesión 6; conectado a Netlify en sesión 7.
+17. **Nuevo (sesión 7):** investigar por qué "acceso directo" no reconoce a un correo que ya tiene autochecks previos reales como suscriptor existente (ver punto 7).
 
 ## Próximos pasos posibles
 - Vista interna (tablero) para seguimiento por `status`, `lead_plus`, `alertas_criticas`/`tier_resultado`/`interes_cta`/`puntaje`.
