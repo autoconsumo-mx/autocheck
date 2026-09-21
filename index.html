@@ -935,6 +935,16 @@
   // -----------------------------------------------------------------
   const SUPABASE_URL = 'https://qdelfelmvwnehyzfzrav.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZWxmZWxtdnduZWh5emZ6cmF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MzY2MDgsImV4cCI6MjEwNTIxMjYwOH0.tkQjlTAMEaFi7tuAs305ZQT4E7kC9A9a0VaeMEL_8PA';
+
+  // Captura los parámetros de la liga de "Confirm sign up" (viene con #type=signup y
+  // tokens de sesión en el hash) ANTES de crear el cliente, porque supabase-js los
+  // detecta y limpia la URL automáticamente al inicializarse.
+  const _hashRedireccion = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+  const _searchRedireccion = window.location.search.startsWith('?') ? window.location.search.slice(1) : '';
+  const paramsRedireccion = new URLSearchParams(_hashRedireccion || _searchRedireccion);
+  const vieneDeConfirmarCorreo = paramsRedireccion.get('type') === 'signup';
+  const erroRedireccionConfirmacion = paramsRedireccion.get('error') || paramsRedireccion.get('error_code');
+
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // -----------------------------------------------------------------
@@ -1875,6 +1885,43 @@
 
     resultado.style.display = 'block';
   });
+
+  // --- Llegada desde la liga de "Confirm sign up" (Opción A: confirmar correo, y al
+  // click mandar de inmediato el primer código de acceso/OTP) ---
+  // Supabase ya dejó al usuario autenticado (procesó los tokens del hash al crear el
+  // cliente); aquí solo hace falta disparar el OTP y mostrar la pantalla para
+  // capturarlo, usando el mismo mecanismo que "acceso directo".
+  async function manejarLlegadaConfirmacionCorreo() {
+    if (erroRedireccionConfirmacion) {
+      // Liga de confirmación expirada o ya usada: se queda en la portada normal,
+      // el usuario puede volver a intentar desde "Ya soy suscriptor" o suscribirse de nuevo.
+      return;
+    }
+    if (!vieneDeConfirmarCorreo) return;
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const correo = session?.user?.email;
+    if (!correo) return;
+
+    contenedorPrincipal.style.display = 'block';
+    portada.style.display = 'none';
+    flujoActual = 'suscripcion';
+
+    const error = await enviarCodigoOtp(correo, false);
+    if (error) {
+      console.error(error);
+      pantallaAcceso.style.display = 'block';
+      accesoCorreoInput.value = correo;
+      accesoMensajeEl.textContent = 'Tu correo ya está confirmado. No pudimos enviarte el código automáticamente — inténtalo de nuevo.';
+      accesoMensajeEl.classList.add('error');
+      return;
+    }
+    mostrarPantallaOtp(correo);
+  }
+
+  manejarLlegadaConfirmacionCorreo();
 
 </script>
 
