@@ -3,6 +3,27 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## ⏸️ Sesión pausada — 21-sep-2026 (sesión 8) — bug de "acceso directo" investigado y corregido
+
+Retomó el pendiente #7/#17 de la sesión 7: por qué `op@energie.mx` (2 autochecks reales previos, 18-sep-2026) fue rechazado por "acceso directo" como si no tuviera suscripción activa.
+
+### Causa raíz encontrada vía logs de Supabase
+Se consultó `auth.users` (proyecto `qdelfelmvwnehyzfzrav`) y confirmó que la cuenta de Auth para `op@energie.mx` **sí existía** desde el 18-sep-2026 (`id d14bced8-8da7-4877-bd0e-8cdbcbfa20f3`, `confirmed_at` 18-sep). Después se consultaron los `auth_logs` (`query_logs`, `source = 'auth_logs'`) del 20-sep y aparecieron varios intentos de `/otp` para ese correo fallando con **errores 500 de SMTP**, no con "usuario no encontrado":
+```
+03:45–03:46  /otp  500  535 "Authentication credentials invalid"  (x3)
+03:49:45     /otp  500  550 "mail.autoconsumo.mx domain is not verified..."
+03:51:27     /otp  200  (ya arreglado el SMTP)
+03:52:06     /verify 200 (login exitoso)
+```
+Es decir: la cuenta era válida todo el tiempo; lo que fallaba era el envío del correo (los mismos problemas de SMTP que se estaban corrigiendo en vivo esa sesión 7). El código en `index.html` (`btnAccesoEnviar` handler) solo distinguía el caso `429` (rate limit); **cualquier otro error, incluyendo estos 500 de SMTP, se interpretaba como "no hay suscripción activa"** y empujaba a un suscriptor real hacia el flujo de alta nueva. No era límite de OTPs (se descartó esa hipótesis con evidencia directa de los logs).
+
+### Fix aplicado
+[index.html:1351-1359](index.html:1351): nueva función `esErrorCuentaNoEncontrada(error)` que solo trata como "cuenta no encontrada" los errores 4xx (rechazo real de GoTrue por `shouldCreateUser:false`); cualquier 5xx o error sin `status` (fallo transitorio de red/SMTP) ahora muestra *"No pudimos enviar el código. Intenta de nuevo en un momento."* en vez de mandar al usuario a suscribirse de nuevo. Commit `8033e98`, push a `main`, deploy automático vía Netlify.
+
+No se hizo prueba end-to-end real del flujo de acceso directo en este fix (para no gastar OTPs/correos reales de Resend sin necesidad) — la verificación fue: lectura directa de logs para confirmar la causa, y carga del archivo modificado en el navegador integrado para confirmar que no hay errores de consola (JS válido). Queda pendiente una prueba real de "acceso directo" con `op@energie.mx` la próxima vez que se retome el proyecto, para confirmar el mensaje correcto en un fallo real.
+
+---
+
 ## ⏸️ Sesión pausada — 20-sep-2026 (sesión 7, primera en Claude Code) — Netlify conectado a GitHub, Auth arreglado, prueba end-to-end exitosa, bug de Vault y de color de medidor corregidos
 
 **Primera sesión de este proyecto en Claude Code** (el trabajo de código se mudó aquí desde Cowork por el bloqueo de push descrito al final de la sesión 6). Se retomó desde el primer commit subido manualmente a `https://github.com/autoconsumo-mx/autocheck`.
@@ -359,7 +380,7 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 4. Decidir Opción A vs B para la plantilla "Confirm sign up".
 5. Confirmar que las franjas del medidor y los bloqueos duros reflejan lo que el equipo espera.
 6. Decidir si el equipo interno necesita ver las respuestas desde el portal (staff vs. leads).
-7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción. **Relacionado, nuevo hallazgo en sesión 7:** un correo (`op@energie.mx`) con 2 autochecks reales previos fue rechazado por "acceso directo" como si no fuera suscriptor — posible bug en la lógica de detección de suscriptor existente, sin investigar a fondo todavía.
+7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción.
 8. Construir la Edge Function que normalice webhooks de Stripe/Mercado Pago.
 9. Detallar la membresía "gold"/plus.
 10. Mostrarle a Alfredo la tabla de 7 etapas del pipeline "REGISTRO CNE" para aprobación.
@@ -369,7 +390,7 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 14. Decidir si vale la pena capturar combustible/antigüedad por tanque individual.
 15. Recuperar/consultar autochecks anteriores — decidido no construir todavía.
 16. ~~Crear/conectar el repositorio de GitHub del proyecto~~ — ✅ hecho en sesión 6; conectado a Netlify en sesión 7.
-17. **Nuevo (sesión 7):** investigar por qué "acceso directo" no reconoce a un correo que ya tiene autochecks previos reales como suscriptor existente (ver punto 7).
+17. ~~Investigar por qué "acceso directo" no reconoce a un correo que ya tiene autochecks previos reales como suscriptor existente~~ — ✅ investigado y corregido en sesión 8 (21-sep-2026): no era un problema de detección de suscriptor, era un error de SMTP (500) mal clasificado como "no hay suscripción" — ver sección de sesión 8 arriba. Queda pendiente probar el flujo real de acceso directo con `op@energie.mx` para confirmar en vivo.
 
 ## Próximos pasos posibles
 - Vista interna (tablero) para seguimiento por `status`, `lead_plus`, `alertas_criticas`/`tier_resultado`/`interes_cta`/`puntaje`.
