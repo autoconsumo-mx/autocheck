@@ -417,13 +417,29 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 - **CTAs:** "Agenda una consulta" resuelto (`https://meetings.hubspot.com/autoconsumo/registro_cne`); Payment Link de asistencia personalizada con discrepancia de precio sin resolver (`https://payments-na1.hubspot.com/payments/9XQrvkQHJGqY6?referrer=PAYMENT_LINK`); "precheck" sin liga todavía.
 - **Decisión de arquitectura de pagos:** HubSpot Payment Links (vía Stripe conectado) para precheck/asistencia (venta asistida); pasarela propia (Stripe + Mercado Pago) para lo que viva dentro del Autocheck mismo.
 
+## Dashboard interno (staff) — spec pendiente, NO empezado a construir
+Alfredo compartió un mockup el 21-sep-2026 (sesión 8) de un dashboard interno que quiere para sí mismo — ver imagen guardada en `docs/mockups/dashboard-interno-mockup.png`. **Solo se anotó el requerimiento; a petición explícita de Alfredo ("no rompas el flujo de trabajo") no se tocó código ni se empezó a construir nada de esto todavía.** Queda ligado al pendiente #6 de la lista de abajo.
+
+Lectura del mockup, campo por campo (para cuando se retome):
+- **Encabezado:** logo + "autoconsumo.mx" + "Autocheck de Registro".
+- **Tarjeta "Usuarios y Autochecks":** Total de suscriptores; Autochecks ejecutados; Usuarios con 1 autocheck / con 2 / con 3+ (desglose por cuántos autochecks ha hecho cada correo — relacionado con `contar_autochecks_usuario()`, ya existente).
+- **Tarjeta "Calidad de autochecks":** Total de autochecks; Con alerta crítica; Con advertencias; Sin alertas ni advertencias (cruza con `tier_resultado`/`alertas_rojas`/`alertas_amarillas`, ya existentes en la tabla).
+- **Tarjeta "Resultados":** conteo de leads por `interes_cta` elegido — "Autocheck plus", "PreCheck-Pro", "Agenda Consulta" (los valores exactos de `interes_cta` que usa `index.html` habría que confirmarlos contra el código antes de construir esto — los nombres del mockup son aproximados/de negocio, no necesariamente el string literal guardado en la columna).
+- **Tarjeta "Regiones":** conteo de leads por estado (columna `estado`) — el mockup muestra "Nuevo León", "Chihuahua", "Estado de México" como ejemplo.
+- **Tabla "Miembros/Usuarios"** con link "VER/EDITAR": una fila por suscriptor (no por autocheck individual), columnas — Nombre, Correo, fecha de Alta, tipo de Member (`free`/`plus`, probablemente ligado a `lead_plus` o a una futura tabla de suscripciones/membresías — **no existe hoy una noción de "usuario" por encima de los leads individuales**, así que esto requeriría diseño de datos nuevo), cantidad de Autochecks ("2 DE 3" sugiere un límite/cupo por plan, concepto que no existe todavía en el sistema), Nick (alias del sitio/instalación — probablemente `nombre_instalacion`), Edo/Mpio (estado/municipio — hoy solo existe `estado`, no hay columna de municipio), y columnas "G D LP" sin leyenda visible en el mockup (posible: Gasolina/Diésel/LP-gas, o alguna otra clasificación — **confirmar con Alfredo qué significan antes de construir**).
+
+**Implicaciones de arquitectura a resolver antes de construir (no triviales):**
+1. Requiere una política de SELECT en `leads_autocheck_estaciones` para `authenticated` (no existe hoy — ver nota en "Verificación por OTP" arriba) y probablemente un rol/flag de "staff" distinto de un suscriptor normal, para no exponer este dashboard a cualquier correo verificado.
+2. El concepto de "Member free/plus" y "cupo de autochecks" (ej. "2 DE 3") no existe en el esquema actual — es una capa de membresía/planes que todavía no está modelada (relacionado con el pendiente #9, "detallar la membresía gold/plus").
+3. Faltan columnas (`municipio`) o hay que confirmar qué representan "G D LP" antes de construir las columnas de la tabla.
+
 ## Pendiente
 1. ~~Subir a Netlify la versión más reciente de `index.html` (o conectar el repo de GitHub a Netlify para que sea automático)~~ — ✅ hecho en sesión 7 (20-sep-2026): repo conectado, deploy automático en cada push a `main`, verificado en vivo dos veces.
 2. ~~Ajustes manuales en Supabase Auth (`qdelfelmvwnehyzfzrav`): Site URL correcto + Custom SMTP vía Resend~~ — ✅ hecho en sesión 7.
 3. ~~Probar end-to-end limpio la función de envío de PDF/correo tras el fix de Site URL/SMTP~~ — ✅ hecho en sesión 7 (correo de prueba `op@energie.mx`). De paso se encontró y corrigió una API key de Resend inválida en el Vault (independiente del SMTP) y se corrigió una inconsistencia de color entre el medidor del sitio y el del PDF — ver detalle en la sección de sesión 7 arriba.
 4. ~~Decidir Opción A vs B para la plantilla "Confirm sign up"~~ — ✅ decidido y codificado en sesión 8 (21-sep-2026): Opción A con auto-envío del OTP al confirmar. Falta que Alfredo pegue la plantilla nueva en el dashboard (opcional, solo estética) y una prueba real end-to-end para confirmar el formato exacto de la redirección de Supabase — ver detalle en "Verificación por OTP" arriba.
 5. Confirmar que las franjas del medidor y los bloqueos duros reflejan lo que el equipo espera.
-6. Decidir si el equipo interno necesita ver las respuestas desde el portal (staff vs. leads).
+6. Construir un dashboard interno (staff) para ver los autochecks — Alfredo compartió un mockup el 21-sep-2026 (sesión 8), ver `docs/mockups/dashboard-interno-mockup.png` y el detalle de campos en "Dashboard interno (staff) — spec pendiente" más abajo. **Todavía no se empezó a construir** — solo quedó anotado el requerimiento, a petición explícita de Alfredo de no interrumpir el flujo de trabajo en curso.
 7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción.
 8. Construir la Edge Function que normalice webhooks de Stripe/Mercado Pago.
 9. Detallar la membresía "gold"/plus.
