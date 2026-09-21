@@ -426,7 +426,7 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 - **Arquitectura decidida:** Tarjeta → Stripe Checkout; SPEI → API de Órdenes de Mercado Pago.
 - **Límite gratis:** por ahora sin límite, ilimitado.
 - **"Precheck" $9,499/año:** en desarrollo en otro hilo de Claude, sin página de venta todavía.
-- **Pipeline "REGISTRO CNE" en HubSpot:** propuesto (7 etapas), no creado — pendiente aprobación explícita de Alfredo.
+- **Pipeline "REGISTRO CNE" en HubSpot:** ✅ creado en sesión 8 (21-sep-2026), aprobado por Alfredo — [pipeline id `936463482`](https://app.hubspot.com/pipelines-settings/51056347/object/0-3/936463482), objeto Deal, 7 etapas: Miembro freemium (registro) → Autocheck generado → Compra (Autocheck Plus / Precheck Pro) → Sesión agendada → Servicio prestado → Registro generado (ganado) / Declinado-no procede (perdido). Refleja el nuevo modelo de membresía freemium que Alfredo está armando (boletines + cupo de autochecks gratis). **Dos huecos técnicos reales, sin construir todavía:** (1) no existe ninguna sincronización entre los leads de Supabase y HubSpot — los deals de este pipeline habría que crearlos/avanzarlos a mano o construir un webhook nuevo; (2) el límite de "3 autochecks gratis" no está aplicado en el sitio (sigue ilimitado) — ninguno de los dos bloqueó crear el pipeline, pero quedan pendientes si se quiere automatizar el funnel completo.
 - **CTAs:** "Agenda una consulta" resuelto (`https://meetings.hubspot.com/autoconsumo/registro_cne`); Payment Link de asistencia personalizada con discrepancia de precio sin resolver (`https://payments-na1.hubspot.com/payments/9XQrvkQHJGqY6?referrer=PAYMENT_LINK`); "precheck" sin liga todavía.
 - **Decisión de arquitectura de pagos:** HubSpot Payment Links (vía Stripe conectado) para precheck/asistencia (venta asistida); pasarela propia (Stripe + Mercado Pago) para lo que viva dentro del Autocheck mismo.
 
@@ -456,7 +456,7 @@ Lectura del mockup, campo por campo (para cuando se retome):
 7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción.
 8. Construir la Edge Function que normalice webhooks de Stripe/Mercado Pago.
 9. Detallar la membresía "gold"/plus.
-10. Mostrarle a Alfredo la tabla de 7 etapas del pipeline "REGISTRO CNE" para aprobación.
+10. ~~Mostrarle a Alfredo la tabla de 7 etapas del pipeline "REGISTRO CNE" para aprobación~~ — ✅ hecho y creado en sesión 8 (21-sep-2026), ver "Monetización y pagos" arriba.
 11. Liga de precheck real; resolver discrepancia de precio de asistencia; prueba end-to-end en producción; decidir si reintroducir botones de precheck/asistencia.
 12. ~~Actualizar `supabase_setup.sql`~~ — ✅ hecho en sesión 8 (21-sep-2026): reescrito a partir del esquema real del proyecto (leído vía MCP de Supabase), corrige varias divergencias (política de INSERT es `authenticated`, no `anon`; `capacidad_tanques` es `numeric[]`; faltaban 7 columnas y las funciones RPC `contar_autochecks_usuario`/`marcar_interes_cta`/`obtener_resend_api_key` con sus permisos; la columna `status` del script viejo ya no existe en la tabla real). Se agregó al repo por primera vez como `supabase_setup.sql` (antes vivía solo como archivo local en Downloads).
 13. Confirmar con Alfredo si el CTA único reemplaza definitivamente a los tres botones anteriores.
