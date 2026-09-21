@@ -494,7 +494,15 @@
 
   <div class="banner-limite" id="banner-limite-gratis">
     <p class="banner-limite-texto" id="banner-limite-texto"></p>
-    <button type="button" class="banner-limite-btn" id="banner-limite-btn" disabled title="Próximamente">¿Necesitas más? Adquiere Autocheck-Plus</button>
+    <button type="button" class="banner-limite-btn" id="banner-limite-btn">¿Necesitas más? Adquiere Autocheck-Plus</button>
+  </div>
+
+  <div class="pantalla-acceso" id="pantalla-limite-alcanzado" style="display:none;">
+    <h2>Ya usaste tus autochecks gratuitos</h2>
+    <p class="subtitulo" id="limite-alcanzado-texto">Ya usaste tus autochecks gratuitos disponibles.</p>
+    <div class="botones">
+      <a class="btn-siguiente" id="btn-limite-comprar-plus" style="text-decoration:none;text-align:center;display:block;box-sizing:border-box;padding:14px;border-radius:8px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;" href="#">Adquiere Autocheck-Plus (+5 autochecks)</a>
+    </div>
   </div>
 
   <div class="progreso-wrap">
@@ -961,6 +969,9 @@
     urlPrecheck: 'mailto:contacto@mail.autoconsumo.mx?subject=' + encodeURIComponent('Me interesa el precheck ($9,499 MXN/año) — resultado de mi Autocheck'),
     urlAsistenciaPersonalizada: 'https://payments-na1.hubspot.com/payments/9XQrvkQHJGqY6?referrer=PAYMENT_LINK',
     urlRegistroCne: 'https://registroautoconsumo.cne.gob.mx/',
+    // TODO(Alfredo): reemplaza por el Payment Link real de "Autocheck Plus" (+5 autochecks,
+    // $1,499 + IVA) en cuanto lo crees en HubSpot (Commerce → Payment Links).
+    urlAutocheckPlus: 'mailto:contacto@mail.autoconsumo.mx?subject=' + encodeURIComponent('Quiero Autocheck Plus (+5 autochecks)'),
   };
 
   function determinarTierResultado(alertasRojas, alertasAmarillas, porcentajePuntaje) {
@@ -979,22 +990,41 @@
     }
   }
 
-  // Límite de autochecks gratuitos — solo informativo por ahora (el botón de upgrade
-  // está deshabilitado, "Autocheck-Plus" todavía no existe como producto para comprar).
+  // Límite de autochecks gratuitos + cupo extra comprado (Autocheck-Plus, +5 por compra,
+  // acumulable — ver public.autocheck_membresias / obtener_cupo_extra_usuario() en Supabase).
   const LIMITE_AUTOCHECKS_GRATIS = 3;
 
-  async function mostrarBannerLimiteGratis() {
-    const texto = document.getElementById('banner-limite-texto');
-    texto.textContent = 'Cargando tu uso de autochecks…';
+  document.getElementById('banner-limite-btn').addEventListener('click', () => {
+    window.location.href = CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus;
+  });
+  document.getElementById('btn-limite-comprar-plus').href = CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus;
+
+  // Devuelve cuántos autochecks ya usó el correo autenticado, su cupo extra comprado,
+  // y el límite total (3 + cupo extra). Si algo falla, deja pasar (no bloquea por un
+  // error de red/RPC) — el límite es una cortesía de producto, no un candado de seguridad.
+  async function obtenerUsoAutochecks() {
     try {
-      const { data, error } = await supabaseClient.rpc('contar_autochecks_usuario');
-      if (error) throw error;
-      const usados = typeof data === 'number' ? data : 0;
-      texto.textContent = `Has utilizado ${usados} de tus ${LIMITE_AUTOCHECKS_GRATIS} autochecks gratuitos.`;
+      const [{ data: usados, error: e1 }, { data: cupoExtra, error: e2 }] = await Promise.all([
+        supabaseClient.rpc('contar_autochecks_usuario'),
+        supabaseClient.rpc('obtener_cupo_extra_usuario'),
+      ]);
+      if (e1 || e2) throw (e1 || e2);
+      const usadosNum = typeof usados === 'number' ? usados : 0;
+      const cupoExtraNum = typeof cupoExtra === 'number' ? cupoExtra : 0;
+      return { usados: usadosNum, cupoExtra: cupoExtraNum, limite: LIMITE_AUTOCHECKS_GRATIS + cupoExtraNum, ok: true };
     } catch (e) {
       console.error(e);
-      texto.textContent = `Autochecks gratuitos: hasta ${LIMITE_AUTOCHECKS_GRATIS}.`;
+      return { usados: 0, cupoExtra: 0, limite: LIMITE_AUTOCHECKS_GRATIS, ok: false };
     }
+  }
+
+  async function mostrarBannerLimiteGratis(usoYaCargado) {
+    const texto = document.getElementById('banner-limite-texto');
+    texto.textContent = 'Cargando tu uso de autochecks…';
+    const { usados, limite, ok } = usoYaCargado || (await obtenerUsoAutochecks());
+    texto.textContent = ok
+      ? `Has utilizado ${usados} de tus ${limite} autochecks disponibles.`
+      : `Autochecks gratuitos: hasta ${LIMITE_AUTOCHECKS_GRATIS}.`;
   }
 
   function escapeHtml(str) {
@@ -1512,9 +1542,18 @@
     correoYaVerificado = true;
     clearInterval(cooldownTimer);
     pantallaOtp.style.display = 'none';
+
+    const uso = await obtenerUsoAutochecks();
+    if (uso.ok && uso.usados >= uso.limite) {
+      document.getElementById('limite-alcanzado-texto').textContent =
+        `Ya usaste tus ${uso.limite} autochecks disponibles con este correo (${uso.usados} realizados). Adquiere Autocheck-Plus para desbloquear 5 más al instante.`;
+      document.getElementById('pantalla-limite-alcanzado').style.display = 'block';
+      return;
+    }
+
     document.querySelector('.progreso-wrap').style.display = 'block';
     formulario.style.display = 'block';
-    mostrarBannerLimiteGratis();
+    mostrarBannerLimiteGratis(uso);
 
     if (flujoActual === 'acceso') {
       // Suscriptor existente: precargamos sus datos guardados y saltamos directo al paso 2
