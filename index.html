@@ -79,9 +79,28 @@
   .banner-limite.mostrar { display: block; }
   .banner-limite-texto { margin: 0 0 4px; font-size: 11px; color: var(--gris); }
   .banner-limite-btn {
-    background: none; border: 1px solid var(--borde); border-radius: 999px; color: var(--gris);
-    font-size: 11px; font-weight: 600; padding: 5px 12px; cursor: not-allowed; width: auto;
+    background: none; border: 1px solid var(--naranja); border-radius: 999px; color: var(--naranja);
+    font-size: 11px; font-weight: 600; padding: 5px 12px; cursor: pointer; width: auto;
   }
+  .banner-limite-btn:hover { background: var(--naranja); color: #fff; }
+
+  .limite-ilustracion { display: block; width: 100%; max-width: 420px; margin: 0 auto 20px; border-radius: 12px; }
+  .limite-plus-card {
+    background: #FAFAFB; border: 1px solid var(--borde); border-radius: 12px;
+    padding: 20px; margin: 20px 0; text-align: center;
+  }
+  .limite-plus-titulo { font-size: 20px; font-weight: 800; color: var(--naranja-oscuro); letter-spacing: .5px; }
+  .limite-plus-desc { font-size: 13px; color: var(--gris); margin: 4px 0 16px; }
+  .limite-plus-precios { margin-bottom: 18px; }
+  .limite-precio-normal { display: block; font-size: 13px; color: var(--gris); text-decoration: line-through; }
+  .limite-precio-especial { display: block; font-size: 19px; font-weight: 800; color: var(--texto); margin-top: 2px; }
+  .limite-precio-especial small { font-size: 12px; font-weight: 600; color: var(--gris); }
+  .limite-btn-comprar {
+    display: block; text-decoration: none; text-align: center; box-sizing: border-box;
+    padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; color: #fff; cursor: pointer;
+  }
+  .limite-precheck-nota { font-size: 13px; color: var(--gris); text-align: center; line-height: 1.5; }
+  .limite-precheck-nota a { color: var(--naranja-oscuro); font-weight: 600; }
 
   /* Portada ancha: elige tu camino (nuevo suscriptor vs. suscriptor existente) — mismo layout que el mockup aprobado */
   #contenedor-principal { display: none; }
@@ -498,11 +517,21 @@
   </div>
 
   <div class="pantalla-acceso" id="pantalla-limite-alcanzado" style="display:none;">
-    <h2>Ya usaste tus autochecks gratuitos</h2>
-    <p class="subtitulo" id="limite-alcanzado-texto">Ya usaste tus autochecks gratuitos disponibles.</p>
-    <div class="botones">
-      <a class="btn-siguiente" id="btn-limite-comprar-plus" style="text-decoration:none;text-align:center;display:block;box-sizing:border-box;padding:14px;border-radius:8px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;" href="#">Adquiere Autocheck-Plus (+5 autochecks)</a>
+    <img src="assets/autocheck-plus-ilustracion.webp" alt="" class="limite-ilustracion">
+    <h2>Se han agotado tus 3 Auto-Check gratuitos</h2>
+    <p class="subtitulo" id="limite-alcanzado-texto">Adquiere un paquete de 5 usos más:</p>
+
+    <div class="limite-plus-card">
+      <div class="limite-plus-titulo">AUTO-CHECK PLUS</div>
+      <div class="limite-plus-desc">+5 autochecks adicionales</div>
+      <div class="limite-plus-precios">
+        <span class="limite-precio-normal">Precio normal: $2,500 MXN</span>
+        <span class="limite-precio-especial">Precio especial para miembros: $1,499 MXN <small>(IVA incluido)</small></span>
+      </div>
+      <a class="btn-siguiente limite-btn-comprar" id="btn-limite-comprar-plus" href="#">COMPRA AUTOCHECK PLUS</a>
     </div>
+
+    <p class="limite-precheck-nota">Si necesitas una revisión profunda, incluyendo la revisión directa de documentos, puedes comprar el <a id="link-limite-precheck" href="#">Precheck Pro</a>.</p>
   </div>
 
   <div class="progreso-wrap">
@@ -998,6 +1027,7 @@
     window.location.href = CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus;
   });
   document.getElementById('btn-limite-comprar-plus').href = CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus;
+  document.getElementById('link-limite-precheck').href = CONFIG_SIGUIENTES_PASOS.urlPrecheck;
 
   // Devuelve cuántos autochecks ya usó el correo autenticado, su cupo extra comprado,
   // y el límite total (3 + cupo extra). Si algo falla, deja pasar (no bloquea por un
