@@ -1348,6 +1348,16 @@
     return !!error && (error.status === 429 || error.code === 'over_email_send_rate_limit');
   }
 
+  // Distingue "esa cuenta no existe" (4xx: GoTrue rechazó shouldCreateUser:false)
+  // de un fallo transitorio al enviar el correo (5xx, típicamente SMTP caído/mal
+  // configurado, o sin status por error de red). Antes cualquier error no-429 se
+  // interpretaba como "no hay suscripción", lo cual es engañoso cuando la cuenta
+  // sí existe pero el correo simplemente no salió (nos pasó con op@energie.mx
+  // durante la sesión del 20-sep-2026 mientras se corregía el SMTP de Resend).
+  function esErrorCuentaNoEncontrada(error) {
+    return !!error && typeof error.status === 'number' && error.status >= 400 && error.status < 500;
+  }
+
   function iniciarCooldownReenvio(segundos) {
     cooldownReenvio = segundos;
     btnOtpReenviar.disabled = true;
@@ -1448,10 +1458,16 @@
         btnAccesoEnviar.textContent = 'Enviar código';
         return;
       }
-      accesoMensajeEl.textContent = 'No encontramos una suscripción activa con ese correo.';
+      if (esErrorCuentaNoEncontrada(error)) {
+        accesoMensajeEl.textContent = 'No encontramos una suscripción activa con ese correo.';
+        accesoMensajeEl.classList.add('error');
+        accesoCorreoNoEncontrado = true;
+        btnAccesoEnviar.textContent = 'Quiero suscribirme';
+        return;
+      }
+      accesoMensajeEl.textContent = 'No pudimos enviar el código. Intenta de nuevo en un momento.';
       accesoMensajeEl.classList.add('error');
-      accesoCorreoNoEncontrado = true;
-      btnAccesoEnviar.textContent = 'Quiero suscribirme';
+      btnAccesoEnviar.textContent = 'Enviar código';
       return;
     }
     btnAccesoEnviar.textContent = 'Enviar código';
