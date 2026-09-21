@@ -345,7 +345,41 @@ Flujo implementado:
 
 **Correos de Auth (OTP, etc.) ahora salen por Custom SMTP vía Resend (sesión 7, 20-sep-2026)** — host `smtp.resend.com`, username `resend` (texto literal, no derivado de la cuenta), remitente personalizado en vez del mailer default de Supabase. Esto resolvió el rate limit bajo del mailer default y permite personalizar subject/remitente en Authentication → Email Templates.
 
-**Pendiente/no aplicado — plantilla "Confirm sign up":** cuando "Confirm email" está activo, Supabase manda el template "Confirm sign up" (solo link, sin código) en vez de "Magic link or OTP". La liga traía `localhost` — **ya corregido en sesión 7** (Site URL + Redirect URLs + SMTP); falta decidir Opción A vs B para este flujo (ver "Pendiente").
+**Decidido en sesión 8 (21-sep-2026) — Opción A, con auto-envío del OTP al confirmar:** cuando "Confirm email" está activo, Supabase manda el template "Confirm sign up" (solo link, sin código) para el alta nueva. Alfredo decidió: el usuario primero confirma su correo con ese link (Opción A, dos pasos), pero en cuanto hace click, el sitio le manda de inmediato el primer código OTP (sin que tenga que hacer nada más) — así el paso de "confirmar" y el de "obtener acceso" se sienten como un solo flujo continuo para el usuario, aunque técnicamente sean dos correos.
+
+Implementado en [index.html:939-946](index.html:939) (captura los parámetros del link antes de que Supabase los consuma) y [index.html:1894-1925](index.html:1894) (`manejarLlegadaConfirmacionCorreo`): al volver del link de confirmación, dispara automáticamente `signInWithOtp(shouldCreateUser:false)` y muestra la pantalla de OTP. Commit `710ace0`, ya en `main`/producción — es un cambio aditivo y no rompe nada existente si algo no calza (simplemente no dispara el auto-OTP).
+
+**Pendiente manual de Alfredo:** pegar esta plantilla en Supabase Dashboard → Authentication → Email Templates → **Confirm signup** (usa el mismo estilo visual que la plantilla de OTP ya pegada):
+```html
+<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;background:#0D1B2A;color:#ffffff;border-radius:12px;overflow:hidden">
+  <div style="background:#112236;padding:24px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08)">
+    <img src="https://kzinwngzpgjorwwnypoq.supabase.co/storage/v1/object/public/assets/autoconsumo-200.png" width="56" height="56" alt="autoconsumo.mx" style="display:block;margin:0 auto;border-radius:50%"/>
+    <div style="margin-top:8px;font-size:13px;color:#ABD3FF">Auto-check · Autoconsumo</div>
+  </div>
+  <div style="padding:32px 24px">
+    <p style="font-size:16px;font-weight:600;margin:0 0 24px">¡Hola!</p>
+
+    <p style="font-size:14px;color:#ffffff;margin:0 0 4px;text-align:center">Estamos confirmando tu correo para tu registro.</p>
+    <p style="font-size:14px;color:#ffffff;font-weight:600;margin:0 0 24px;text-align:center">¡Todo listo!</p>
+
+    <p style="font-size:13px;color:#ABD3FF;line-height:1.6;margin:0 0 20px;text-align:center">Haz click para recibir tu clave de acceso al Autocheck.<br>Te enviaremos un nuevo correo con tu código.</p>
+
+    <div style="text-align:center;margin:0 0 24px">
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#F6B72B;color:#0D1B2A;font-weight:700;font-size:14px;text-decoration:none;padding:12px 28px;border-radius:8px">CLICK</a>
+    </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.08);margin:0 0 20px;"></div>
+
+    <p style="font-size:12px;color:#8A9BB0;line-height:1.6;margin:0">Si no solicitaste este registro, puedes eliminar e ignorar este mensaje. Tu cuenta permanece segura.</p>
+  </div>
+  <div style="background:#112236;padding:16px 24px;text-align:center;border-top:1px solid rgba(255,255,255,0.08)">
+    <p style="font-size:11px;color:#8A9BB0;margin:0">© 2026 autoconsumo.mx · Fuel Experts</p>
+  </div>
+</div>
+```
+El botón usa `{{ .ConfirmationURL }}` (el merge tag correcto de Supabase para este template — es lo que dispara la confirmación real al hacer click). Pegar la plantilla es opcional para que el código funcione (sin ella, el link de confirmación sigue funcionando con el template genérico de Supabase, solo que sin el estilo de marca) — pero si no se pega, el correo se ve genérico, no de marca.
+
+**Sin verificar todavía (necesita una prueba real con Alfredo):** se asumió que la liga de confirmación de Supabase redirige de vuelta al sitio usando tokens de sesión en el hash de la URL (`#access_token=...&type=signup`), que es el comportamiento implícito por default de supabase-js v2 (este proyecto no configura `flowType: 'pkce'` en ningún lado). Si Supabase en realidad usa el flujo PKCE (`?code=...` en vez de hash), la detección no dispararía y el usuario simplemente se quedaría en la portada tras confirmar, sin el auto-OTP — sin romper nada, pero sin el efecto deseado. Confirmar con una alta de prueba real la próxima vez que se retome el proyecto.
 
 **RLS:** solo `authenticated` puede insertar en `leads_autocheck_estaciones`.
 
@@ -387,7 +421,7 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 1. ~~Subir a Netlify la versión más reciente de `index.html` (o conectar el repo de GitHub a Netlify para que sea automático)~~ — ✅ hecho en sesión 7 (20-sep-2026): repo conectado, deploy automático en cada push a `main`, verificado en vivo dos veces.
 2. ~~Ajustes manuales en Supabase Auth (`qdelfelmvwnehyzfzrav`): Site URL correcto + Custom SMTP vía Resend~~ — ✅ hecho en sesión 7.
 3. ~~Probar end-to-end limpio la función de envío de PDF/correo tras el fix de Site URL/SMTP~~ — ✅ hecho en sesión 7 (correo de prueba `op@energie.mx`). De paso se encontró y corrigió una API key de Resend inválida en el Vault (independiente del SMTP) y se corrigió una inconsistencia de color entre el medidor del sitio y el del PDF — ver detalle en la sección de sesión 7 arriba.
-4. Decidir Opción A vs B para la plantilla "Confirm sign up".
+4. ~~Decidir Opción A vs B para la plantilla "Confirm sign up"~~ — ✅ decidido y codificado en sesión 8 (21-sep-2026): Opción A con auto-envío del OTP al confirmar. Falta que Alfredo pegue la plantilla nueva en el dashboard (opcional, solo estética) y una prueba real end-to-end para confirmar el formato exacto de la redirección de Supabase — ver detalle en "Verificación por OTP" arriba.
 5. Confirmar que las franjas del medidor y los bloqueos duros reflejan lo que el equipo espera.
 6. Decidir si el equipo interno necesita ver las respuestas desde el portal (staff vs. leads).
 7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción.
