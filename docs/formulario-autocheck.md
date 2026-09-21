@@ -22,6 +22,16 @@ Es decir: la cuenta era válida todo el tiempo; lo que fallaba era el envío del
 
 No se hizo prueba end-to-end real del flujo de acceso directo en este fix (para no gastar OTPs/correos reales de Resend sin necesidad) — la verificación fue: lectura directa de logs para confirmar la causa, y carga del archivo modificado en el navegador integrado para confirmar que no hay errores de consola (JS válido). Queda pendiente una prueba real de "acceso directo" con `op@energie.mx` la próxima vez que se retome el proyecto, para confirmar el mensaje correcto en un fallo real.
 
+### `supabase_setup.sql` actualizado y agregado al repo
+Se leyó el esquema real del proyecto (`qdelfelmvwnehyzfzrav`) directamente vía MCP de Supabase (`list_tables`, RLS policies, funciones RPC, permisos) y se reescribió el script, que llevaba desactualizado desde la reconstrucción del proyecto (17-sep-2026, sesión 4) y hasta ahora solo existía como archivo local en `Downloads`, nunca trackeado en el repo. Divergencias reales encontradas y corregidas:
+- La política de INSERT es para el rol `authenticated`, no `anon` (el lead se inserta después de verificar el correo por OTP, cuando el usuario ya tiene sesión).
+- `capacidad_tanques` es `numeric[]` en la tabla real, no `integer[]` como decía el script viejo.
+- Faltaban 7 columnas que sí existen en la tabla real: `acepta_aviso_privacidad`, `aviso_privacidad_version`, `alertas_rojas`, `alertas_amarillas`, `tier_resultado`, `interes_cta`, `interes_cta_en`.
+- La columna `status` del script viejo (para seguimiento interno) **ya no existe** en la tabla real — se perdió en la reconstrucción y nunca se volvió a crear (sigue relacionado con el pendiente #6, sin decidir).
+- Faltaban por completo las funciones RPC `contar_autochecks_usuario()` y `marcar_interes_cta(uuid, text)` (usadas por `index.html`) y la función `obtener_resend_api_key()` del Vault, junto con sus permisos (`revoke`/`grant execute`).
+
+El script sigue sin incluir la API key de Resend en texto plano (por diseño, según la nota de seguridad de este documento) — solo trae el comando `vault.create_secret(...)` como instrucción a correr manualmente desde el dashboard.
+
 ---
 
 ## ⏸️ Sesión pausada — 20-sep-2026 (sesión 7, primera en Claude Code) — Netlify conectado a GitHub, Auth arreglado, prueba end-to-end exitosa, bug de Vault y de color de medidor corregidos
@@ -385,7 +395,7 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 9. Detallar la membresía "gold"/plus.
 10. Mostrarle a Alfredo la tabla de 7 etapas del pipeline "REGISTRO CNE" para aprobación.
 11. Liga de precheck real; resolver discrepancia de precio de asistencia; prueba end-to-end en producción; decidir si reintroducir botones de precheck/asistencia.
-12. Actualizar `supabase_setup.sql`.
+12. ~~Actualizar `supabase_setup.sql`~~ — ✅ hecho en sesión 8 (21-sep-2026): reescrito a partir del esquema real del proyecto (leído vía MCP de Supabase), corrige varias divergencias (política de INSERT es `authenticated`, no `anon`; `capacidad_tanques` es `numeric[]`; faltaban 7 columnas y las funciones RPC `contar_autochecks_usuario`/`marcar_interes_cta`/`obtener_resend_api_key` con sus permisos; la columna `status` del script viejo ya no existe en la tabla real). Se agregó al repo por primera vez como `supabase_setup.sql` (antes vivía solo como archivo local en Downloads).
 13. Confirmar con Alfredo si el CTA único reemplaza definitivamente a los tres botones anteriores.
 14. Decidir si vale la pena capturar combustible/antigüedad por tanque individual.
 15. Recuperar/consultar autochecks anteriores — decidido no construir todavía.
