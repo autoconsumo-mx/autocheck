@@ -3,6 +3,55 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## ⏸️ Sesión pausada — 22-sep-2026 (sesión 9) — Producto y Payment Link de Autocheck Plus confirmados en HubSpot, prefill de correo investigado, embed inline sin terminar, dos pendientes nuevos (factura fiscal, ¿unificar en HubSpot?)
+
+Sesión corta de seguimiento a la 8. Alfredo avanzó su parte en HubSpot; se verificó todo vía MCP/navegador y se dejó a medias la integración del checkout embebido porque Alfredo pidió pausar.
+
+### 1. Producto "Autocheck-Plus" — ✅ confirmado creado en HubSpot
+Verificado vía MCP de HubSpot: producto [`Autocheck-Plus`, id `48048125205`](https://app.hubspot.com/contacts/51056347/objects/0-7/views/all/list?filters=%5B%7B%22property%22%3A%22hs_object_id%22%2C%22operator%22%3A%22EQ%22%2C%22value%22%3A%2248048125205%22%7D%5D), `hs_price_mxn: 1499`, activo. Alfredo también creó de paso el producto [`Pre-Check PRO`, id `48048125209`](https://app.hubspot.com/contacts/51056347/objects/0-7/views/all/list?filters=%5B%7B%22property%22%3A%22hs_object_id%22%2C%22operator%22%3A%22EQ%22%2C%22value%22%3A%2248048125209%22%7D%5D) (sin usar todavía — sigue pospuesto del sitio, ver sección Precheck Pro arriba).
+
+### 2. Payment Link — ✅ creado y probado, pero con discrepancia de IVA sin resolver
+Link real: `https://payments-na1.hubspot.com/payments/TbjTnQQWT6GFxQ?referrer=PAYMENT_LINK`. Probado en vivo en el navegador integrado: muestra el producto correcto ("Auto-check PLUS", $1,499.00 con 40.04% de descuento vs. $2,500), pide correo/WhatsApp/nombre/empresa. **Pero cobra IVA aparte:** "+ $239.84 IVA" → Total real **$1,738.84 MXN**, no los $1,499 MXN que dice el sitio ("IVA incluido", [index.html:527](index.html:527)). Se le preguntó a Alfredo si prefiere (a) mostrar el total con IVA en el sitio, o (b) ajustar el Payment Link en HubSpot para que el precio ya incluya IVA — **pregunta descartada sin responder, sigue abierta.**
+
+### 3. Embed inline del checkout — investigado y confirmado viable, implementación NO terminada
+Alfredo compartió el código de inserción de HubSpot:
+```html
+<div class="payments-iframe-container" data-src="https://payments-na1.hubspot.com/payments/TbjTnQQWT6GFxQ?referrer=PAYMENT_LINK_EMBED&layout=embed-full"></div>
+<script type="text/javascript" src="https://static.hsappstatic.net/payments-embed/ex/PaymentsEmbedCode.js"></script>
+```
+Y pidió explícitamente evitar que el cliente vuelva a teclear su correo, para no arriesgar que pague con un correo distinto al de su cuenta (el webhook `webhook-compra-plus` otorga el cupo extra al correo que llega en el body del pago — si no coincide con el correo de su sesión, el cliente pagaría sin recibir su cupo).
+
+**Confirmado por prueba directa en el navegador (sin tocar código todavía):**
+- El parámetro `?email=correo%40dominio.com` en la URL del Payment Link **sí precarga el campo de correo** del formulario de pago (probado con `prueba@autoconsumo.mx`, visible en pantalla).
+- Los parámetros `firstname`, `company`, `phone` **NO** precargan nada — HubSpot solo soporta prefill del correo por esta vía, no de los demás campos.
+- La URL con `&layout=embed-full` (la misma que trae el `data-src` del código de inserción) renderiza limpia por sí sola, sin nav/header — se puede usar directamente como `src` de un `<iframe>` propio, sin depender del script externo `PaymentsEmbedCode.js` (evita problemas de timing si se inyecta el correo dinámicamente después de que el usuario ya inició sesión).
+
+**Plan para la próxima sesión (no implementado aún, ningún archivo fue tocado):**
+1. En `index.html`, agregar un `<iframe>` (en vez del `<a id="btn-limite-comprar-plus">` actual) dentro de `#pantalla-limite-alcanzado`.
+2. Función compartida `mostrarPantallaAutocheckPlus()`: llama `supabaseClient.auth.getSession()` para obtener el correo real de la sesión activa, arma `src = 'https://payments-na1.hubspot.com/payments/TbjTnQQWT6GFxQ?referrer=PAYMENT_LINK_EMBED&layout=embed-full&email=' + encodeURIComponent(correo)`, lo asigna al iframe, y muestra la pantalla.
+3. Usar esa función tanto en el trigger automático de "límite alcanzado" (línea ~1577) como en el click del banner chico `banner-limite-btn` (línea ~1024, hoy hace `location.href` a un placeholder `mailto:` — hay que quitar ese placeholder y el `CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus` que ya no aplica).
+4. Agregar CSS para el iframe (ancho 100%, alto suficiente para el formulario completo con datos de tarjeta — probar altura real, el formulario es largo).
+5. Probar una compra real de punta a punta con el embed ya prefilled.
+
+### 4. Pendiente nuevo: liga para pedir factura fiscal → Alegra
+Alfredo pidió agregar una liga para que el cliente pueda solicitar su factura fiscal, y que esas solicitudes se enruten a **Alegra** (no se dio todavía la URL/mecanismo exacto — falta que Alfredo comparta la liga real de Alegra o cómo quiere que funcione el flujo). Sin investigar ni implementar, solo anotado.
+
+### 5. Pregunta abierta nueva: ¿unificar todo en HubSpot?
+Alfredo preguntó "¿Vamos a unir todo en HubSpot?" (en el contexto de pagos/facturación) — no se aclaró el alcance de la pregunta ni se respondió. Sin resolver, retomar la próxima sesión para entender qué significa "todo" (¿solo pagos y facturas, o también otros flujos?) antes de tomar cualquier decisión de arquitectura.
+
+### Pendiente inmediato al retomar, en orden
+1. Aclarar con Alfredo la pregunta de IVA (punto 2: total con IVA visible vs. ajustar HubSpot) — bloquea terminar el copy y el embed.
+2. Terminar la implementación del embed inline con prefill de correo (plan detallado en punto 3).
+3. Entender y resolver el pendiente de la liga de factura fiscal → Alegra (punto 4) — pedir a Alfredo la URL/mecanismo real.
+4. Retomar la pregunta abierta "¿unir todo en HubSpot?" (punto 5) — entender el alcance antes de proponer nada.
+5. Una vez el embed esté funcionando, hacer la compra real de prueba de punta a punta (pago → webhook → cupo otorgado → wizard desbloqueado) — sigue sin probarse.
+6. Confirmar con una alta nueva real que el correo "Confirm signup" ya no cae en spam (pendiente desde sesión 8).
+7. Retomar la discrepancia de precio de "asistencia personalizada" cuando Alfredo tenga tiempo.
+8. Si se acerca el 25-sep-2026, revisar Precheck Pro como cross-sell (ya tiene Producto en HubSpot, falta todo lo demás — portal, copy en el sitio).
+9. Pendientes de negocio sin tocar: dashboard interno (mockup en `docs/mockups/dashboard-interno-mockup.png`), detallar membresía "gold".
+
+---
+
 ## ⏸️ Sesión pausada — 22-sep-2026, actualización (fin de sesión 8) — Autocheck Plus lanzado, pipeline de HubSpot creado, Precheck Pro pospuesto
 
 Continuación de la misma sesión 8 (empezó 21-sep, cruzó medianoche). Lo de abajo es lo que pasó **después** del fix de "acceso directo" y de `supabase_setup.sql` (ver esa sección, justo debajo de esta).
