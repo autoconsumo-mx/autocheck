@@ -3,6 +3,40 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## ⏸️ Sesión pausada — 22-sep-2026, actualización (fin de sesión 8) — Autocheck Plus lanzado, pipeline de HubSpot creado, Precheck Pro pospuesto
+
+Continuación de la misma sesión 8 (empezó 21-sep, cruzó medianoche). Lo de abajo es lo que pasó **después** del fix de "acceso directo" y de `supabase_setup.sql` (ver esa sección, justo debajo de esta).
+
+### 1. Opción A (confirmación de correo + auto-OTP) — ✅ verificada en vivo de punta a punta
+Alfredo hizo un alta real (`contenidosfactory@gmail.com`) y confirmó por captura de pantalla + `auth_logs` que el flujo completo funciona: click en "Confirm email address" → sesión implícita → segundo OTP disparado solo → correo con la CLAVE recibido correctamente. Cerró también los tres pendientes de dashboard: plantilla+subject de "Confirm signup" en español/marca, subject de "Magic Link" en español, y confirmó que `autoconsumo.mx` está **Verified** en Resend desde hace 4 meses (descarta DNS como causa de que el correo cayera en spam). Detalle completo en la sección "Verificación por OTP" más abajo en este documento.
+
+### 2. Pipeline "REGISTRO CNE" en HubSpot — ✅ creado y aprobado
+Alfredo diseñó su propio set de 7 etapas (ligadas a un nuevo modelo de membresía freemium) y se creó vía MCP de HubSpot: [pipeline id `936463482`](https://app.hubspot.com/pipelines-settings/51056347/object/0-3/936463482). Detalle en "Monetización y pagos".
+
+### 3. Autocheck Plus (+5 autochecks) — ✅ construido, probado y **en producción**
+El límite de 3 autochecks gratis pasó de ser solo informativo a bloquear de verdad la entrada al wizard. Se construyó de cero: tabla de cupo extra en Supabase, funciones RPC, una Edge Function de webhook (`webhook-compra-plus`, protegida con secreto, probada con `curl` antes de desplegar), y la pantalla de compra en el sitio (con la ilustración e copy que dio Alfredo, precio $2,500→$1,499 MXN). Detalle técnico completo en "Autocheck Plus" dentro de "Monetización y pagos".
+**Lo único que falta para que la compra sea 100% automática es que Alfredo cree el Producto + Payment Link + Workflow en HubSpot** (instrucciones exactas ya dadas, ver esa sección) — mientras tanto el botón usa un `mailto:` placeholder.
+
+### 4. Precheck Pro — nuevo producto definido, explícitamente pospuesto
+Alfredo compartió el copy y precio de un producto nuevo y distinto del "precheck" viejo ($25,000/$14,999 MXN, revisión de documentos con abogados+IA, portal propio). Se había agregado por error un link a esto en la pantalla de Autocheck Plus — Alfredo pidió quitarlo ("no lo incluyas aún") porque vive en su propio portal aparte. Meta: incorporarlo como cross-sell desde Autocheck antes del **25-sep-2026**. Detalle en "Precheck Pro" dentro de "Monetización y pagos".
+
+### 5. Precio de "asistencia personalizada" — investigado, no resuelto del todo
+Alfredo preguntó si ese Payment Link cobra de verdad — sí, $17,397.97 MXN (15% de descuento sobre $17,645 + IVA), confirmado navegando la página real de checkout. La "discrepancia de precio" pendiente desde hace varias sesiones sigue sin cerrarse porque, según Alfredo, "son varios productos" — no se investigó más a fondo esta sesión.
+
+### 6. Arquitectura de pagos (Tarjeta→Stripe / SPEI→Mercado Pago) — reconfirmada sin cambios
+Alfredo estaba explorando activar "Transferencias bancarias" en Stripe (que sí cubre México y funciona como un equivalente a SPEI) y por un momento pensó que esa había sido la decisión ya tomada. Se aclaró: lo documentado siempre fue SPEI vía Mercado Pago, Stripe solo para tarjeta. **Alfredo decidió: dejarlo como está documentado** (no cambió la arquitectura), y se fue a HubSpot a seguir con los pasos de Autocheck Plus.
+
+### Pendiente inmediato al retomar, en orden
+1. Alfredo termina en HubSpot: crear el Producto "Autocheck Plus", el Payment Link, y el Workflow con la acción "Trigger a webhook" (URL + secreto + body ya especificados en "Autocheck Plus" abajo).
+2. En cuanto Alfredo pase el Payment Link real, reemplazar el placeholder `mailto:` de `urlAutocheckPlus` en `index.html` y redesplegar.
+3. Hacer una compra real de prueba de Autocheck Plus de punta a punta (pago → webhook → cupo otorgado → se desbloquea el wizard) — no se probó todavía porque no existía el Payment Link real.
+4. Confirmar con una alta nueva real que el correo "Confirm signup" ya no cae en spam ahora que tiene la plantilla de marca (pendiente desde antes, nunca se re-probó).
+5. Retomar la discrepancia de precio de "asistencia personalizada" cuando Alfredo tenga tiempo de desenredar "los varios productos".
+6. Antes del 25-sep-2026: incorporar Precheck Pro como cross-sell desde Autocheck (el portal de Precheck Pro en sí es un proyecto aparte, no construir aquí).
+7. Pendientes de negocio sin tocar: dashboard interno para Alfredo (mockup guardado en `docs/mockups/dashboard-interno-mockup.png`, sin empezar a construir), detallar la membresía "gold" más allá de Autocheck Plus.
+
+---
+
 ## ⏸️ Sesión pausada — 21-sep-2026 (sesión 8) — bug de "acceso directo" investigado y corregido
 
 Retomó el pendiente #7/#17 de la sesión 7: por qué `op@energie.mx` (2 autochecks reales previos, 18-sep-2026) fue rechazado por "acceso directo" como si no tuviera suscripción activa.
@@ -423,7 +457,7 @@ Checkbox obligatorio al final del paso 1 (solo suscriptores nuevos). Columnas: `
 "Con acompañamiento" en la última pregunta → `lead_plus = true` (uso interno, sin impacto en puntaje).
 
 ## Monetización y pagos
-- **Arquitectura decidida:** Tarjeta → Stripe Checkout; SPEI → API de Órdenes de Mercado Pago.
+- **Arquitectura decidida:** Tarjeta → Stripe Checkout; SPEI → API de Órdenes de Mercado Pago. Reconfirmado sin cambios en sesión 8 (22-sep-2026) — Alfredo consideró usar la función de "Transferencias bancarias" de Stripe (que cubre México) para SPEI en vez de Mercado Pago, pero decidió dejarlo como está documentado.
 - **Límite gratis: ✅ implementado y en producción desde sesión 8 (21-sep-2026).** 3 autochecks gratis por correo, ya bloqueado de verdad (antes era solo informativo) — ver "Autocheck Plus" abajo.
 - **Pipeline "REGISTRO CNE" en HubSpot:** ✅ creado en sesión 8 (21-sep-2026), aprobado por Alfredo — [pipeline id `936463482`](https://app.hubspot.com/pipelines-settings/51056347/object/0-3/936463482), objeto Deal, 7 etapas: Miembro freemium (registro) → Autocheck generado → Compra (Autocheck Plus / Precheck Pro) → Sesión agendada → Servicio prestado → Registro generado (ganado) / Declinado-no procede (perdido). Refleja el nuevo modelo de membresía freemium que Alfredo está armando (boletines + cupo de autochecks gratis). **Hueco técnico real, sin construir todavía:** no existe ninguna sincronización entre los leads de Supabase/el cupo de Autocheck Plus y HubSpot — los deals de este pipeline habría que crearlos/avanzarlos a mano o construir un webhook nuevo (distinto del webhook de cobro de Autocheck Plus, que sí ya existe — ver abajo).
 - **CTAs:** "Agenda una consulta" resuelto (`https://meetings.hubspot.com/autoconsumo/registro_cne`); Payment Link de asistencia personalizada con discrepancia de precio sin resolver (`https://payments-na1.hubspot.com/payments/9XQrvkQHJGqY6?referrer=PAYMENT_LINK` — sí tiene cobro real, $17,397.97 MXN con 15% de descuento aplicado; falta confirmar con Alfredo si ese es el monto correcto o si la discrepancia es con otro producto — quedó sin resolver, "son varios productos").
