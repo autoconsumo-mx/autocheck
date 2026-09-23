@@ -151,7 +151,7 @@ async function enviarCorreoCompra(correo: string, nombre: string, ticket: Ticket
 <h3>¿Necesitas factura?</h3>
 <p>Puedes generarla tú mismo:</p>
 <ol>
-  <li>Entra a <a href="${escaparHtml(ticket.ligaFactura)}"><strong>Solicitar mi factura →</strong></a> (portal.alegra.com)</li>
+  <li>Entra a <a href="${escaparHtml(ticket.ligaFactura)}"><strong>Solicitar mi factura →</strong></a></li>
   <li>Los datos del ticket y fecha son los de arriba (ya estarán pre-llenados).</li>
   <li>Solo debes ingresar tus datos fiscales tal como aparecen en tu Constancia de Situación Fiscal.</li>
 </ol>
