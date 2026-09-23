@@ -3,6 +3,36 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## 🔄 Sesión 10 — 22-sep-2026 — IVA resuelto (absorber), facturación vía autofacturación de tickets Alegra + webhook
+
+### 1. IVA — ✅ decidido: absorberlo, el cliente paga $1,499.00 parejo
+Precio base en HubSpot debe ser **$1,292.24** (1,499 ÷ 1.16) → + $206.76 IVA = **$1,499.00**. Mismo criterio para Pre-Check PRO si aplica: base **$8,619.83** → $9,999.00.
+**⚠️ Al cierre, verificado en vivo, NO estaba aplicado:** el producto `Autocheck-Plus` seguía en `hs_price_mxn: 1499` (sin modificar desde su creación) y el checkout del Payment Link seguía cobrando $1,499 + $239.84 = **$1,738.84**. Ojo: el Payment Link guarda su propia copia del precio — hay que editar el link (Commerce → Payment Links → Editar), no solo el producto.
+
+### 2. Factura fiscal — ✅ decidido: autofacturación de tickets de Alegra, alimentada por nuestro webhook
+- Se descartó la integración Alegra↔Stripe del marketplace de Alegra: resultó ser un Zap de Zapier, no nativa.
+- Se descartó la liga `clientes.alegra.com/new-statement/...` que pasó Alfredo: es el **estado de cuenta de un cliente específico** (expone su historial) — **nunca publicarla**.
+- Alegra de Alfredo **ya tiene "Autofacturación de tickets" activa**: serie/folio `Auto Check-Plus`, plazo "último día del mes", correo de contacto configurado. Portal (genérico, el mismo del QR): **`https://portal.alegra.com/invoice-generator`** (= `aleg.la/mifactura`). Pide **fecha de emisión + código de ticket**, luego RFC / razón social / correo / régimen / CP / uso CFDI, y timbra.
+- **Plan del webhook** (`webhook-compra-plus`, hoy solo vive en Supabase v1 — subirlo al repo): (1) otorgar +5 como hoy; (2) crear **Ticket de venta** en Alegra por $1,292.24 + IVA 16% = $1,499.00 a nombre del correo; (3) mandar correo (Resend) con código de ticket, fecha, **fecha límite (último día del mes)** y liga al portal. Si falla Alegra, el cupo se otorga igual y el error queda en logs.
+- Token de API de Alegra con permisos mínimos, guardado en Supabase Edge Function Secrets (nunca en chat ni en el repo).
+
+### 3. Flujo decidido: ticket para TODOS + portal para quien quiera factura
+Se descartó preguntar "¿deseas facturar?" y timbrar nosotros (validación CFDI 4.0 + rechazos SAT caerían en nuestro webhook). Si los clientes se atoran en el portal, se puede migrar después reutilizando el ticket.
+
+**Correo de compra (aprobado por Alfredo):** asunto "Tu compra de Autocheck Plus — ticket y factura". Contenido: gracias + "ya tienes 5 autochecks adicionales"; bloque "Tu ticket de compra" (código, fecha de emisión, total $1,499.00 MXN IVA incluido); bloque "¿Necesitas factura?" con 3 pasos (entrar al portal, escribir fecha + código, datos fiscales "tal como aparecen en tu Constancia de Situación Fiscal"); cierre exacto de Alfredo:
+> ⚠️ Tienes hasta el [último día del mes] para solicitarla. Después ya no será posible autofacturar esta compra.
+>
+> ¿Dudas con tu factura? Escríbenos a [correo de contacto].
+
+Lo mismo (código, fecha, botón al portal) va también en la pantalla de "gracias" del sitio. Falta confirmar el correo de contacto.
+
+### Pendientes al cierre de sesión 10
+1. Alfredo: crear token Alegra y guardarlo en Supabase Secrets.
+2. Alfredo: corregir precio en el **Payment Link** (no solo el producto) a $1,292.24.
+3. Alfredo: confirmar que existe el Workflow HubSpot que llama a `webhook-compra-plus`.
+4. Claude (con el token): consulta de solo lectura a Alegra (ítem, id del IVA 16%, numeración de tickets, qué campo es el "código de ticket" del portal) → escribir y desplegar el webhook extendido → compra real de prueba de punta a punta (cobro $1,499 → cupo → ticket → correo → autofactura).
+5. Sigue pendiente de sesión 9: embed `<iframe>` con prefill de correo, y aclarar "¿unimos todo en HubSpot?".
+
 ## ⏸️ Sesión pausada — 22-sep-2026 (sesión 9) — Producto y Payment Link de Autocheck Plus confirmados en HubSpot, prefill de correo investigado, embed inline sin terminar, dos pendientes nuevos (factura fiscal, ¿unificar en HubSpot?)
 
 Sesión corta de seguimiento a la 8. Alfredo avanzó su parte en HubSpot; se verificó todo vía MCP/navegador y se dejó a medias la integración del checkout embebido porque Alfredo pidió pausar.
