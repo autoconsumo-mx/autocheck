@@ -3,7 +3,7 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
-## ⏸️ Sesión pausada — 22-sep-2026 (sesión 10) — IVA resuelto, facturación vía autofacturación de tickets Alegra; webhook escrito pero BLOQUEADO por 403 de Alegra al crear tickets
+## ⏸️ Sesión pausada — 22-sep-2026 (sesión 10) — IVA resuelto, facturación vía autofacturación de tickets Alegra; webhook con tickets Alegra DESPLEGADO
 
 ### 1. IVA — ✅ resuelto y verificado en vivo
 Se absorbe el IVA: el cliente paga **$1,499.00** parejo. Payment Link verificado en vivo: $1,292.24 (tachado $2,155.17, "40.04% de descuento") + $206.76 IVA = **Pagar $1,499.00 MXN**. Lección: el Payment Link guarda **su propia copia** del precio — hay que editar el link, no solo el producto. Si Pre-Check PRO se quiere igual: base **$8,619.83** → $9,999.00.
@@ -21,20 +21,22 @@ Asunto "Tu compra de Autocheck Plus — ticket y factura". Gracias + "ya tienes 
 ### 4. Webhook extendido — escrito en el repo, **NO desplegado**
 `supabase/functions/webhook-compra-plus/index.ts` (primera vez en el repo). Producción sigue en la **v1** (solo otorga +5). La versión del repo: otorga +5 → crea ticket en Alegra → manda el correo. Si Alegra o el correo fallan, el cupo se queda y responde 200 igual (para que HubSpot no reintente y dé 10). Auth Alegra: **Bearer** con `ALEGRA_TOKEN` (los tokens nuevos con permisos NO usan Basic usuario:token; `ALEGRA_USER` sobra).
 
-### 5. 🚧 Bloqueo: Alegra responde 403 a `POST /sale-tickets`
-Con tres tokens distintos de permisos granulares (el último con Ticket de venta: Agregar, Facturas: Crear, recibos de caja, y lectura de bancos, almacenes, listas de precios, vendedores, términos de pago, etc.): todas las lecturas dan 200, pero **crear un ticket da 403 siempre**, incluso con body mínimo (cliente + ítem). Con el último token además `GET /sale-tickets` dio 500. Conclusión: no es un permiso faltante que podamos marcar — probablemente los tokens granulares no permiten crear tickets por API, o es un bug de Alegra. **No se creó ningún ticket por API.**
-Opciones al pausar:
-1. **Soporte de Alegra** (chat en la app) — mensaje ya redactado en el chat de la sesión: token con Ticket de venta→Agregar, GET ok, POST /sale-tickets 403 con body mínimo; ¿qué permiso o tipo de token hace falta?
-2. **Token clásico** (correo + token, acceso total) — probablemente funcione, pero puede emitir/cancelar CFDI y ver todo si se filtra. Variante más segura: usuario de Alegra aparte con rol limitado y su token clásico — **Alfredo no sabe si su plan permite usuarios/roles**.
-3. **Desplegar ya con respaldo manual**: si falla el ticket, mandar aviso a ayuda@ con el correo del comprador para hacer el ticket a mano. (Recomendado mientras responde soporte — requiere un pequeño ajuste al código.)
-- Función temporal de diagnóstico `alegra-probe-temp` quedó **neutralizada** (responde 410); falta **borrarla desde el dashboard** de Supabase (el MCP no tiene delete de funciones).
+### 5. ✅ Bloqueo resuelto (misma noche): los tickets se crean con `POST /invoices`
+- En Alegra **los tickets de venta son facturas** con numeración de tipo `saleTicket` (T1 aparece en `GET /invoices/11` con `documentType: saleTicket`). **`/sale-tickets` solo sirve para descargar PDFs**: `POST /sale-tickets` da 403 con tokens JWT y **200 con `[]` sin crear nada** con las credenciales clásicas. Los 403 de antes no eran de permisos.
+- Por decisión de Alfredo se usan temporalmente las **credenciales clásicas** (sección "Credenciales de acceso" de Alegra, acceso total) mientras soporte responde: secretos `ALEGRA_USER` + `ALEGRA_TOKEN` (auth Basic). El código acepta ambos tipos (`authAlegra()`: con `ALEGRA_USER` → Basic; sin él → Bearer/JWT). Siguiente paso de seguridad: probar `POST /invoices` con un **token JWT limitado** (Facturas: Crear + Ticket de venta + recibos de caja + lecturas) y, si funciona, quitar `ALEGRA_USER` y cambiar a ese token.
+- **Ticket de prueba T2** creado por API (Alfredo corrió la prueba): 201, `saleTicket`, no electrónico, **sin timbre**, total $1,499 pagado ($1,499, saldo 0, estado closed), forma de pago `credit-card`, nota correcta, código + liga de autofactura. Cobro registrado en la cuenta **"Cheques BBVA" (id 5)** — confirmar con Alfredo que ahí caen los depósitos de Stripe.
+- El auto-mode classifier bloquea que Claude ejecute escrituras reales en Alegra; Alfredo corrió las pruebas en PowerShell. Tras la autorización explícita de Alfredo sí se permitió desplegar.
+
+### 6. ✅ Webhook extendido DESPLEGADO en producción
+`webhook-compra-plus` (repo = producción): +5 → ticket en Alegra (`POST /invoices`, numeración 2, ítem 14, IVA 2, pago tarjeta cuenta 5, nota "Pagado con tarjeta…") → correo con código, fecha, fecha límite y botón al portal prellenado. **Respaldo**: si Alegra falla, el cliente recibe confirmación sin ticket ("te llega en máx. un día hábil") y ayuda@ recibe aviso con el correo del comprador para hacer el ticket a mano. Siempre responde 200 tras otorgar el cupo (evita que HubSpot reintente y dé 10). Verificado que arranca (sin secreto → 401). **No probado aún con una compra real.**
+`alegra-probe-temp` neutralizada (410); borrarla desde el dashboard.
 
 ### Pendientes al cierre de sesión 10
-1. Alfredo: escribir al soporte de Alegra y/o revisar si su plan permite usuarios con rol limitado.
-2. Decidir entre opciones 1/2/3 del bloqueo → ajustar y desplegar el webhook.
-3. Alfredo: confirmar que existe el Workflow HubSpot que llama a `webhook-compra-plus` (body sugerido: `{"correo": "{{ contact.email }}", "nombre": "{{ contact.firstname }}"}`).
-4. Alfredo: borrar `alegra-probe-temp` en Supabase → Edge Functions; opcional borrar el secreto `ALEGRA_USER` (no se usa); anular ticket T1 en Alegra.
-5. Compra real de punta a punta (cobro $1,499 → cupo → ticket → correo → autofactura).
+1. Alfredo: confirmar que existe el Workflow HubSpot que llama a `webhook-compra-plus` (body: `{"correo": "{{ contact.email }}", "nombre": "{{ contact.firstname }}"}`) — sin él nada de esto corre.
+2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
+3. Confirmar cuenta de cobros en Alegra ("Cheques BBVA", id 5).
+4. Seguridad: preguntar a soporte / probar `POST /invoices` con token JWT limitado → migrar y quitar credenciales clásicas.
+5. Limpieza: borrar `alegra-probe-temp`; anular T1 y T2 en Alegra; borrar tokens JWT sin uso ("Autocheck-Plus", y "Autochek-full" que tiene todos los permisos).
 6. Siguen de sesión 9: embed `<iframe>` con prefill de correo; aclarar "¿unimos todo en HubSpot?".
 
 ## ⏸️ Sesión pausada — 22-sep-2026 (sesión 9) — Producto y Payment Link de Autocheck Plus confirmados en HubSpot, prefill de correo investigado, embed inline sin terminar, dos pendientes nuevos (factura fiscal, ¿unificar en HubSpot?)
