@@ -141,23 +141,23 @@ async function enviarCorreoCompra(correo: string, nombre: string, ticket: Ticket
   const limite = fechaLarga(ultimoDiaDelMes(ticket.fecha));
   const html = `
 <p>${saludo}</p>
-<p>¡Gracias por tu compra! Ya tienes <strong>${CANTIDAD_POR_COMPRA} autochecks adicionales</strong> disponibles en tu cuenta.</p>
-<h3>Tu ticket de compra</h3>
+<p>¡Gracias por tu compra!<br>Ya tienes <strong>${CANTIDAD_POR_COMPRA} Score-Autocheck adicionales</strong> disponibles.</p>
+<h3>Este es tu ticket digital de compra</h3>
 <ul>
   <li>Código de ticket: <strong>${escaparHtml(ticket.codigo)}</strong></li>
   <li>Fecha de emisión: <strong>${fechaLarga(ticket.fecha)}</strong></li>
   <li>Total: <strong>${pesos(total)} MXN</strong> (IVA incluido)</li>
 </ul>
 <h3>¿Necesitas factura?</h3>
-<p>Puedes generarla tú mismo en un par de minutos:</p>
+<p>Puedes generarla tú mismo:</p>
 <ol>
-  <li>Entra a <a href="${escaparHtml(ticket.ligaFactura)}"><strong>Solicitar mi factura →</strong></a> (tu código y fecha ya van llenos).</li>
-  <li>Si te los pide, escribe la fecha y el código de ticket de arriba.</li>
-  <li>Captura tus datos fiscales tal como aparecen en tu Constancia de Situación Fiscal.</li>
+  <li>Entra a <a href="${escaparHtml(ticket.ligaFactura)}"><strong>Solicitar mi factura →</strong></a> (portal.alegra.com)</li>
+  <li>Los datos del ticket y fecha son los de arriba (ya estarán pre-llenados).</li>
+  <li>Solo debes ingresar tus datos fiscales tal como aparecen en tu Constancia de Situación Fiscal.</li>
 </ol>
-<p>⚠️ Tienes hasta el <strong>${limite}</strong> para solicitarla. Después ya no será posible autofacturar esta compra.</p>
+<p>Tienes hasta el <strong>${limite}</strong> para solicitarla. Después ya no será posible autofacturar esta compra.</p>
 <p>¿Dudas con tu factura? Escríbenos a <a href="mailto:${CORREO_AYUDA}">${CORREO_AYUDA}</a>.</p>
-<p>— autoconsumo.mx</p>`;
+<p>Visita: <a href="https://autoconsumo.mx">https://autoconsumo.mx</a></p>`;
 
   return await enviarResend(correo, "Tu compra de Autocheck Plus — ticket y factura", html, resendKey);
 }
@@ -173,10 +173,10 @@ async function enviarCorreoCompraSinTicket(correo: string, nombre: string, total
     : "";
   const html = `
 <p>${saludo}</p>
-<p>¡Gracias por tu compra! Ya tienes <strong>${CANTIDAD_POR_COMPRA} autochecks adicionales</strong> disponibles en tu cuenta.</p>
+<p>¡Gracias por tu compra!<br>Ya tienes <strong>${CANTIDAD_POR_COMPRA} Score-Autocheck adicionales</strong> disponibles.</p>
 ${factura}
 <p>¿Dudas? Escríbenos a <a href="mailto:${CORREO_AYUDA}">${CORREO_AYUDA}</a>.</p>
-<p>— autoconsumo.mx</p>`;
+<p>Visita: <a href="https://autoconsumo.mx">https://autoconsumo.mx</a></p>`;
   return await enviarResend(correo, "Tu compra de Autocheck Plus", html, resendKey);
 }
 
