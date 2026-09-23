@@ -1,18 +1,19 @@
 // Supabase Edge Function: webhook-compra-plus
-// Recibe el aviso de pago de "Autocheck Plus" (HubSpot Workflow -> acción "Trigger webhook"),
-// otorga +5 autochecks extra (acumulable) al correo del comprador, crea el ticket de venta
-// en Alegra (a "Público en General", pagado con tarjeta) y le manda al cliente un correo con
-// su ticket y la liga para autofacturar en el portal de Alegra.
+// Recibe el aviso de pago de "Autocheck Plus", otorga +5 autochecks extra (acumulable) al
+// correo del comprador, crea el ticket de venta en Alegra (a "Público en General", pagado con
+// tarjeta) y le manda al cliente un correo con su ticket y la liga para autofacturar.
 //
-// Seguridad: sin verify_jwt (HubSpot no manda un JWT de Supabase). En su lugar valida
-// un secreto compartido (?secret=... en la URL, guardado en Vault como
-// 'webhook_compra_plus_secret') para que nadie mas pueda llamar este endpoint y
-// autorotorgarse cupo gratis.
+// Dos formas de llamarla (sin verify_jwt: ninguna manda un JWT de Supabase):
 //
-// Configura en HubSpot la acción "Trigger webhook" del Workflow con:
-//   URL:    https://<project>.supabase.co/functions/v1/webhook-compra-plus?secret=<secreto>
-//   Method: POST
-//   Body (JSON): {"correo": "{{ contact.email }}", "nombre": "{{ contact.firstname }}"}
+// 1. Stripe (la principal): los Payment Links de HubSpot cobran con la cuenta de Stripe de
+//    Alfredo, y HubSpot Starter no permite workflows con webhook. Endpoint en el dashboard de
+//    Stripe apuntando a esta URL (sin ?secret) con el evento `charge.succeeded`. Se valida la
+//    firma `Stripe-Signature` con el secreto STRIPE_WEBHOOK_SECRET; solo se procesan cobros
+//    de $1,499.00 MXN, y cada pago una sola vez (tabla autocheck_plus_pagos_procesados), porque
+//    Stripe reintenta los avisos.
+//
+// 2. Manual / HubSpot: POST ?secret=<secreto en Vault 'webhook_compra_plus_secret'> con body
+//    {"correo": "...", "nombre": "..."}. Sirve para otorgar una compra a mano.
 //
 // Alegra: secreto de Edge Functions ALEGRA_TOKEN (token JWT limitado), ver authAlegra().
 // Si Alegra o el correo fallan, el cupo ya quedó otorgado: el error se registra en logs
@@ -39,6 +40,9 @@ const PORTAL_AUTOFACTURA = "https://portal.alegra.com/invoice-generator";
 const RESEND_FROM_EMAIL = "autocheck@autoconsumo.mx";
 const RESEND_FROM_NAME = "Autocheck · autoconsumo.mx";
 const CORREO_AYUDA = "ayuda@mail.autoconsumo.mx";
+
+const MONTO_STRIPE_CENTAVOS = 149900; // $1,499.00 MXN
+const TOLERANCIA_FIRMA_SEG = 300;
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -191,83 +195,167 @@ async function enviarResend(para: string, asunto: string, html: string, resendKe
   return data;
 }
 
+// Aviso interno cuando llega un cobro de Autocheck Plus en Stripe sin correo del comprador.
+async function enviarAvisoSinCorreo(pagoId: string, nombre: string, resendKey: string) {
+  const html = `
+<p><strong>Llegó un cobro de Autocheck Plus ($1,499.00) en Stripe sin correo del comprador.</strong> No se otorgaron autochecks ni se creó ticket.</p>
+<ul>
+  <li>Pago en Stripe: <strong>${escaparHtml(pagoId)}</strong></li>
+  <li>Nombre: ${escaparHtml(nombre || "(sin nombre)")}</li>
+</ul>
+<p>Busca el pago en Stripe o HubSpot para obtener el correo y otórgale la compra a mano.</p>`;
+  return await enviarResend(CORREO_AYUDA, `Revisar pago Autocheck Plus sin correo — ${pagoId}`, html, resendKey);
+}
+
+function respuestaJson(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), { status, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });
+}
+
+function hexDe(buf: ArrayBuffer) {
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function igualesSeguro(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
+}
+
+// Verifica el encabezado Stripe-Signature ("t=...,v1=...") según la documentación de Stripe:
+// HMAC-SHA256 de "<t>.<cuerpo crudo>" con el signing secret del endpoint.
+async function firmaStripeValida(cuerpo: string, encabezado: string, secreto: string) {
+  const partes = encabezado.split(",").map((p) => p.trim().split("="));
+  const t = partes.find(([k]) => k === "t")?.[1];
+  const firmas = partes.filter(([k]) => k === "v1").map(([, v]) => v);
+  if (!t || firmas.length === 0) return false;
+  if (Math.abs(Date.now() / 1000 - Number(t)) > TOLERANCIA_FIRMA_SEG) return false;
+  const clave = await crypto.subtle.importKey("raw", new TextEncoder().encode(secreto), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const esperada = hexDe(await crypto.subtle.sign("HMAC", clave, new TextEncoder().encode(`${t}.${cuerpo}`)));
+  return firmas.some((f) => igualesSeguro(f, esperada));
+}
+
+type Supa = ReturnType<typeof createClient>;
+
+async function obtenerResendKey(supabaseAdmin: Supa) {
+  const { data, error } = await supabaseAdmin.rpc("obtener_resend_api_key");
+  if (error || !data) throw new Error("No se pudo obtener la API key de Resend: " + (error?.message || "no configurada"));
+  return data as string;
+}
+
+// Otorga el cupo, crea el ticket y manda los correos. Lanza error solo si falla el cupo;
+// lo demás se reporta en `errores` (el cupo ya quedó otorgado y no debe repetirse).
+async function procesarCompra(supabaseAdmin: Supa, correo: string, nombre: string) {
+  const { data: nuevoCupo, error: otorgarErr } = await supabaseAdmin.rpc("otorgar_cupo_extra_autocheck_plus", {
+    p_correo: correo,
+    p_cantidad: CANTIDAD_POR_COMPRA,
+  });
+  if (otorgarErr) {
+    throw new Error("No se pudo otorgar el cupo extra: " + otorgarErr.message);
+  }
+
+  const fecha = hoyCdmx();
+  let ticket: Ticket | null = null;
+  let correoEnviado = false;
+  let avisoEnviado = false;
+  const errores: string[] = [];
+  try {
+    ticket = await crearTicketAlegra(fecha);
+  } catch (e) {
+    console.error("Ticket Alegra falló para", correo, e);
+    errores.push("alegra: " + String((e as Error)?.message || e));
+  }
+  try {
+    const resendKey = await obtenerResendKey(supabaseAdmin);
+    if (ticket) {
+      await enviarCorreoCompra(correo, nombre, ticket, resendKey);
+      correoEnviado = true;
+    } else {
+      // Respaldo manual: el cliente recibe su confirmación sin ticket, y el equipo un aviso
+      // para crear el ticket a mano en Alegra y mandárselo.
+      await enviarCorreoCompraSinTicket(correo, nombre, resendKey);
+      correoEnviado = true;
+      await enviarAvisoTicketManual(correo, nombre, fecha, errores.join(" | "), resendKey);
+      avisoEnviado = true;
+    }
+  } catch (e) {
+    console.error("Correo de compra/aviso falló para", correo, "ticket", ticket?.folio, e);
+    errores.push("correo: " + String((e as Error)?.message || e));
+  }
+
+  return { ok: true, correo, cupo_extra_total: nuevoCupo, ticket: ticket && { folio: ticket.folio, codigo: ticket.codigo }, correo_enviado: correoEnviado, aviso_ticket_manual: avisoEnviado, errores };
+}
+
+async function manejarStripe(req: Request, supabaseAdmin: Supa, firma: string) {
+  const secreto = (Deno.env.get("STRIPE_WEBHOOK_SECRET") || "").trim();
+  if (!secreto) throw new Error("Falta el secreto STRIPE_WEBHOOK_SECRET");
+  const cuerpo = await req.text();
+  if (!(await firmaStripeValida(cuerpo, firma, secreto))) {
+    return respuestaJson({ ok: false, error: "firma de Stripe inválida" }, 400);
+  }
+
+  const evento = JSON.parse(cuerpo);
+  if (evento.type !== "charge.succeeded") return respuestaJson({ ok: true, ignorado: `evento ${evento.type}` });
+  const cargo = evento.data?.object ?? {};
+  if (cargo.amount !== MONTO_STRIPE_CENTAVOS || String(cargo.currency).toLowerCase() !== "mxn") {
+    return respuestaJson({ ok: true, ignorado: `cobro de ${cargo.amount} ${cargo.currency}, no es Autocheck Plus` });
+  }
+
+  const pagoId = String(cargo.payment_intent || cargo.id);
+  const nombre = typeof cargo.billing_details?.name === "string" ? cargo.billing_details.name.trim().split(/\s+/)[0] : "";
+  const correoCrudo = cargo.billing_details?.email || cargo.receipt_email || "";
+  if (!esCorreoValido(correoCrudo)) {
+    console.error("Cobro de Autocheck Plus sin correo:", pagoId);
+    await enviarAvisoSinCorreo(pagoId, nombre, await obtenerResendKey(supabaseAdmin));
+    return respuestaJson({ ok: true, sin_correo: pagoId });
+  }
+  const correo = correoCrudo.trim().toLowerCase();
+
+  // Reclamar el pago antes de procesarlo: si Stripe reenvía el aviso, el segundo no pasa de aquí.
+  const { data: reclamado, error: reclamoErr } = await supabaseAdmin
+    .from("autocheck_plus_pagos_procesados")
+    .upsert({ pago_id: pagoId, correo }, { onConflict: "pago_id", ignoreDuplicates: true })
+    .select("pago_id");
+  if (reclamoErr) throw new Error("No se pudo registrar el pago: " + reclamoErr.message);
+  if (!reclamado || reclamado.length === 0) return respuestaJson({ ok: true, duplicado: pagoId });
+
+  try {
+    const resultado = await procesarCompra(supabaseAdmin, correo, nombre);
+    if (resultado.ticket?.folio) {
+      await supabaseAdmin.from("autocheck_plus_pagos_procesados").update({ ticket_folio: resultado.ticket.folio }).eq("pago_id", pagoId);
+    }
+    return respuestaJson({ ...resultado, pago_id: pagoId });
+  } catch (e) {
+    // El cupo no se otorgó: liberar el pago para que el reintento de Stripe lo vuelva a intentar.
+    await supabaseAdmin.from("autocheck_plus_pagos_procesados").delete().eq("pago_id", pagoId);
+    throw e;
+  }
+}
+
+async function manejarManual(req: Request, supabaseAdmin: Supa) {
+  const secretRecibido = new URL(req.url).searchParams.get("secret") || "";
+  const { data: secretReal, error: secretErr } = await supabaseAdmin.rpc("obtener_webhook_compra_plus_secret");
+  if (secretErr || !secretReal) {
+    throw new Error("No se pudo obtener el secreto del webhook: " + (secretErr?.message || "no configurado"));
+  }
+  if (secretRecibido !== secretReal) return respuestaJson({ ok: false, error: "secreto inválido" }, 401);
+
+  const body = await req.json().catch(() => ({}));
+  const correo = body?.correo;
+  if (!esCorreoValido(correo)) return respuestaJson({ ok: false, error: "Falta un correo válido en el body" }, 400);
+  const nombre = typeof body?.nombre === "string" ? body.nombre.trim().split(/\s+/)[0] : "";
+  // Siempre 200 tras otorgar el cupo: un 5xx haría que el llamador reintentara y otorgara doble.
+  return respuestaJson(await procesarCompra(supabaseAdmin, correo.trim(), nombre));
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
   try {
     const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-    const url = new URL(req.url);
-    const secretRecibido = url.searchParams.get("secret") || "";
-    const { data: secretReal, error: secretErr } = await supabaseAdmin.rpc("obtener_webhook_compra_plus_secret");
-    if (secretErr || !secretReal) {
-      throw new Error("No se pudo obtener el secreto del webhook: " + (secretErr?.message || "no configurado"));
-    }
-    if (secretRecibido !== secretReal) {
-      return new Response(JSON.stringify({ ok: false, error: "secreto inválido" }), {
-        status: 401,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-      });
-    }
-
-    const body = await req.json().catch(() => ({}));
-    const correo = body?.correo;
-    if (!esCorreoValido(correo)) {
-      return new Response(JSON.stringify({ ok: false, error: "Falta un correo válido en el body" }), {
-        status: 400,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-      });
-    }
-    const nombre = typeof body?.nombre === "string" ? body.nombre.trim().split(/\s+/)[0] : "";
-
-    const { data: nuevoCupo, error: otorgarErr } = await supabaseAdmin.rpc("otorgar_cupo_extra_autocheck_plus", {
-      p_correo: correo,
-      p_cantidad: CANTIDAD_POR_COMPRA,
-    });
-    if (otorgarErr) {
-      throw new Error("No se pudo otorgar el cupo extra: " + otorgarErr.message);
-    }
-
-    // A partir de aquí el cupo ya está otorgado: un fallo de Alegra o del correo no debe
-    // regresar error a HubSpot (lo reintentaría y otorgaría el cupo dos veces).
-    const fecha = hoyCdmx();
-    let ticket: Ticket | null = null;
-    let correoEnviado = false;
-    let avisoEnviado = false;
-    const errores: string[] = [];
-    try {
-      ticket = await crearTicketAlegra(fecha);
-    } catch (e) {
-      console.error("Ticket Alegra falló para", correo, e);
-      errores.push("alegra: " + String((e as Error)?.message || e));
-    }
-    try {
-      const { data: resendKey, error: keyErr } = await supabaseAdmin.rpc("obtener_resend_api_key");
-      if (keyErr || !resendKey) throw new Error("No se pudo obtener la API key de Resend: " + (keyErr?.message || "no configurada"));
-      if (ticket) {
-        await enviarCorreoCompra(correo.trim(), nombre, ticket, resendKey as string);
-        correoEnviado = true;
-      } else {
-        // Respaldo manual: el cliente recibe su confirmación sin ticket, y el equipo un aviso
-        // para crear el ticket a mano en Alegra y mandárselo.
-        await enviarCorreoCompraSinTicket(correo.trim(), nombre, resendKey as string);
-        correoEnviado = true;
-        await enviarAvisoTicketManual(correo.trim(), nombre, fecha, errores.join(" | "), resendKey as string);
-        avisoEnviado = true;
-      }
-    } catch (e) {
-      console.error("Correo de compra/aviso falló para", correo, "ticket", ticket?.folio, e);
-      errores.push("correo: " + String((e as Error)?.message || e));
-    }
-
-    return new Response(
-      JSON.stringify({ ok: true, correo, cupo_extra_total: nuevoCupo, ticket: ticket && { folio: ticket.folio, codigo: ticket.codigo }, correo_enviado: correoEnviado, aviso_ticket_manual: avisoEnviado, errores }),
-      { headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    const firma = req.headers.get("stripe-signature");
+    return firma ? await manejarStripe(req, supabaseAdmin, firma) : await manejarManual(req, supabaseAdmin);
   } catch (e) {
     console.error(e);
-    return new Response(JSON.stringify({ ok: false, error: String((e as Error)?.message || e) }), {
-      status: 500,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    });
+    return respuestaJson({ ok: false, error: String((e as Error)?.message || e) }, 500);
   }
 });

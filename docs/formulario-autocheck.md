@@ -31,8 +31,14 @@ Asunto "Tu compra de Autocheck Plus — ticket y factura". Gracias + "ya tienes 
 `webhook-compra-plus` (repo = producción): +5 → ticket en Alegra (`POST /invoices`, numeración 2, ítem 14, IVA 2, pago tarjeta cuenta 5, nota "Pagado con tarjeta…") → correo con código, fecha, fecha límite y botón al portal prellenado. **Respaldo**: si Alegra falla, el cliente recibe confirmación sin ticket ("te llega en máx. un día hábil") y ayuda@ recibe aviso con el correo del comprador para hacer el ticket a mano. Siempre responde 200 tras otorgar el cupo (evita que HubSpot reintente y dé 10). Verificado que arranca (sin secreto → 401). **No probado aún con una compra real.**
 `alegra-probe-temp` ya borrada.
 
+### 7. HubSpot Starter no tiene workflows con webhook → el disparador es un webhook de **Stripe**
+Las licencias de HubSpot son Starter (Sales + Service); la acción "Enviar un webhook" requiere Operations/Data Hub Pro. Alfredo eligió la opción A: los Payment Links de HubSpot cobran con su cuenta de Stripe, así que un endpoint de webhook en el **dashboard de Stripe** (evento ) llama a .
+- La función distingue por el encabezado : valida la firma (HMAC con , tolerancia 5 min), ignora todo lo que no sea  de **149900 MXN**, toma el correo de  o  (si no hay, aviso a ayuda@), y registra el pago en la tabla nueva **** (PK  = payment_intent) **antes** de procesar, para que los reintentos de Stripe no dupliquen cupo ni ticket. Si falla el otorgamiento del cupo, borra el registro y responde 500 para que Stripe reintente.
+- El camino manual ( + ) se conserva para otorgar compras a mano.
+- Desplegado y verificado con llamadas inofensivas (sin secreto → 401; firma falsa sin  → 500 "Falta el secreto"). **Pendiente**: que Alfredo cree el endpoint en Stripe y guarde  en Supabase. Supuesto por confirmar con la primera compra real: que HubSpot llena el correo del comprador en el cargo de Stripe.
+
 ### Pendientes al cierre de sesión 10
-1. Alfredo: confirmar que existe el Workflow HubSpot que llama a `webhook-compra-plus` (body: `{"correo": "{{ contact.email }}", "nombre": "{{ contact.firstname }}"}`) — sin él nada de esto corre.
+1. Alfredo: crear el webhook en Stripe (evento `charge.succeeded` → URL de `webhook-compra-plus`) y guardar su signing secret como `STRIPE_WEBHOOK_SECRET` en Supabase — sin esto nada corre (HubSpot Starter no tiene workflows con webhook).
 2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
 3. Confirmar cuenta de cobros en Alegra ("Cheques BBVA", id 5).
 4. Limpieza: anular T1, T2 y T3 en Alegra; opcional "Renovar token" de las credenciales clásicas si nada más las usa. (Ya hecho: `alegra-probe-temp` borrada, token "Autochek-full" borrado, secreto `ALEGRA_USER` borrado — solo queda `ALEGRA_TOKEN` = JWT "Autocheck-Plus".)
