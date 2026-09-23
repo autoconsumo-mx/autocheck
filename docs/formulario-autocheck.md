@@ -37,6 +37,23 @@ Las licencias de HubSpot son Starter (Sales + Service); la acción "Enviar un we
 - El camino manual (`?secret=` + `{correo, nombre}`) se conserva para otorgar compras a mano.
 - Desplegado y verificado con llamadas inofensivas (sin secreto → 401; firma falsa sin `STRIPE_WEBHOOK_SECRET` → 500 "Falta el secreto"). **Pendiente**: que Alfredo cree el endpoint en Stripe y guarde `STRIPE_WEBHOOK_SECRET` en Supabase. Supuesto por confirmar con la primera compra real: que HubSpot llena el correo del comprador en el cargo de Stripe.
 
+### 8. Replanteamiento (23-sep-2026): el valor está en los datos del uso gratuito → Autocheck alimenta a HubSpot
+**Diagnóstico:** el pipeline REGISTRO CNE no funciona porque **ningún dato llega a HubSpot** (todas las etapas "Se usa en: 0"); todo se queda en Supabase. HubSpot es Starter: sin workflows con webhook, pero la API (app privada) sí está disponible → **nuestro código mueve el pipeline y llena los contactos**.
+
+**Decisiones de Alfredo:**
+- HubSpot = CRM + mailing. Todos los usuarios del Autocheck se pasan a HubSpot con **todos los datos del autocheck** (grupo de propiedades "Autocheck"; el contacto guarda el autocheck más reciente + contador, el historial completo sigue en Supabase — objetos personalizados son Enterprise).
+- **Niveles de membresía** (propiedad que solo sube): **Freemium** (se registra) → **Member Plus** (compra Autocheck Plus) → **Member Gold** (compra Precheck PRO; aún no existe, es otro proyecto en desarrollo). Propiedad aparte **Cliente consultoría** (sí/no): agenda sesión + contrata asesoría; por ahora la marca Alfredo a mano (la contratación es venta asistida, fuera del sitio).
+- **Listas activas** en HubSpot por propiedad: Freemium, Member Plus, Member Gold, Clientes Consultoría = listas de mailing.
+- Pipeline movido por código: registro → "Miembro freemium"; autocheck → "Autocheck generado"; compra Plus → "Compra"; clic en agendar → "Sesión agendada".
+- Autocheck Plus pasa a **Stripe directo** (Payment Link/Checkout de Stripe con cuenta del cliente prellenada), sin el Payment Link de HubSpot; la compra llega igual a HubSpot vía nuestro código. Coincide con la decisión original de arquitectura (HubSpot para venta asistida, Stripe para lo que vive dentro del Autocheck).
+
+**Automatizaciones (cron diario en Supabase + Resend; vigentes hasta el 31-dic-2026, fecha configurable):**
+1. Agotó sus 5 autochecks de Plus → correo de invitación a Precheck PRO. Mientras Precheck PRO no exista: **lista de espera** ("Avísame cuando esté listo" → marca `Interés en Precheck PRO = Sí` en HubSpot).
+2. Compró Plus y no usa ningún autocheck en 14 días → recordatorio (usar autochecks / agendar consulta / avísame de Precheck PRO); propuesto 2.º a los 28 días; se detiene si usa uno. Pendiente que Alfredo confirme 1 o 2 recordatorios.
+- Todos con enlace "No quiero recibir estos correos" (opt-out guardado en Supabase y reflejado en HubSpot). Revisar que el Aviso de Privacidad cubra fines de marketing, y el plan de correo de marketing de HubSpot.
+
+**Orden acordado:** (1) Autocheck → HubSpot; (2) Autocheck Plus directo en Stripe (token Alegra nuevo con permisos de lectura de facturas y recibos + botón del sitio); (3) automatizaciones; (4) prueba de punta a punta.
+
 ### Pendientes al cierre de sesión 10
 1. Alfredo: crear el webhook en Stripe (evento `charge.succeeded` → URL de `webhook-compra-plus`) y guardar su signing secret como `STRIPE_WEBHOOK_SECRET` en Supabase — sin esto nada corre (HubSpot Starter no tiene workflows con webhook).
 2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
