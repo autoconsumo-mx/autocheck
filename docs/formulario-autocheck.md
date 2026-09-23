@@ -3,6 +3,25 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## Sesión 11 — 23-sep-2026 — PDF del reporte rediseñado y mensajes de alertas reescritos (en producción)
+
+### 1. Mensajes de alertas (sitio + PDF) — ✅ textos de Alfredo
+- `index.html`: `PROBLEMA_TEXTO` (afirmación, en negritas) + nuevo `CONSEJO_TEXTO` (consejo) por campo; la pantalla de resultado y las cadenas `alertas_rojas`/`alertas_amarillas` (→ BD y PDF) usan "Afirmación. Consejo.". El aviso corto dentro del formulario (`<div class="alerta">`) no cambió. Se agregó `alerta-tanques` → campo `tanques`.
+- Gravedad: ahora son **rojas** tener permiso, tres facturas, vehículos ajenos, no opera, clausura/sanción, **permiso del distribuidor** y **relación de vehículos** (estas dos antes amarillas). `elegibleRegistro` no cambió (solo permiso / vehículos ajenos / no opera bloquean).
+- Singular/plural en "tanque(s)" y "año(s)".
+
+### 2. PDF (`enviar-reporte-autocheck` v31) — ✅ aprobado por Alfredo y probado con autocheck real
+- Letra chica tipo estado de cuenta; barritas decorativas redondeadas en el encabezado (réplica del diseño de Alfredo, `BARRAS_HEADER`); apodo en MAYÚSCULAS; SAT = 4 esferas juntas; estrellas en protocolos; divisor vertical en el banner; conteos en singular/plural ("1 Bandera Roja - Punto Crítico").
+- Cada alerta: situación en negritas + consejo abajo (`separarAlerta` corta en el primer `. ! ? :`).
+- Las cajas se miden antes de dibujarse y **se parten entre hojas** con "(continuación)" y encabezado discreto; con las 18 alertas el PDF queda de 3 hojas.
+- **Poppins** (Regular/Bold, OFL) en encabezado y banner: archivos en `assets/fonts/` servidos por Netlify; la función los descarga (timeout 4 s, caché en memoria) y si fallan usa Helvetica.
+- **Bug corregido:** un emoji (o carácter fuera de WinAnsi) en el nombre tumbaba el PDF y el cliente no recibía reporte; ahora `limpiarPayload` quita esos caracteres.
+- Para iterar sin tocar producción: copiar `index.ts` quitando `npm:` y `Deno.serve`, correr `buildAutocheckPdf` con Node + `pdf-lib` + `@pdf-lib/fontkit`, y renderizar con PyMuPDF. En producción, `preview: true` devuelve el PDF sin mandar correo.
+
+### Pendientes al cierre de sesión 11
+Siguen los de la sesión 10 (§ abajo) salvo el 0 (PDF, hecho): automatizaciones (14 días / Precheck PRO), listas de HubSpot, OXXO/SPEI, caducidad de `PLUS750`, ticket de Alegra adjunto, regenerar `supabase_setup.sql`.
+- Menor: el correo del reporte inserta el nombre de la instalación en el HTML sin escapar (solo se lo manda el usuario a sí mismo); el título "Puntos adecuados" del PDF no coincide con "Fortalezas y checks" del sitio.
+
 ## ⏸️ Sesión pausada — 22/23-sep-2026 (sesión 10) — Autocheck Plus en producción de punta a punta (Stripe directo + Alegra + HubSpot); lanzamiento con publicidad el 24-sep
 
 ### 1. IVA — ✅ resuelto y verificado en vivo
