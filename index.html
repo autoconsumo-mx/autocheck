@@ -80,9 +80,16 @@
   .banner-limite-texto { margin: 0 0 4px; font-size: 11px; color: var(--gris); }
   .banner-limite-btn {
     background: none; border: 1px solid var(--naranja); border-radius: 999px; color: var(--naranja);
-    font-size: 11px; font-weight: 600; padding: 5px 12px; cursor: pointer; width: auto;
+    font-size: 11px; font-weight: 600; padding: 3px 3px 3px 12px; cursor: pointer; width: auto;
+    display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
   }
   .banner-limite-btn:hover { background: var(--naranja); color: #fff; }
+  .banner-limite-cupon {
+    background: var(--naranja); color: #fff; border-radius: 999px; padding: 2px 9px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
+  }
+  .banner-limite-btn:hover .banner-limite-cupon { background: #fff; color: var(--naranja); }
+  @media (max-width: 480px) { .banner-limite-btn { padding: 5px 12px 6px; gap: 4px; } }
 
   .aviso-compra {
     background: #EAF7EE; border-left: 3px solid #2E9E5B; border-radius: 6px;
@@ -520,7 +527,7 @@
 
   <div class="banner-limite" id="banner-limite-gratis">
     <p class="banner-limite-texto" id="banner-limite-texto"></p>
-    <button type="button" class="banner-limite-btn" id="banner-limite-btn">¿Necesitas más? Adquiere Autocheck-Plus</button>
+    <button type="button" class="banner-limite-btn" id="banner-limite-btn">¿Necesitas más? Adquiere Autocheck-Plus <span class="banner-limite-cupon">CUPÓN POR $750.00</span></button>
   </div>
 
   <div class="pantalla-acceso" id="pantalla-limite-alcanzado" style="display:none;">
@@ -1009,7 +1016,7 @@
     // la procesa la Edge Function webhook-compra-plus (evento de Stripe), ver ligaCompraPlus().
     urlAutocheckPlus: 'https://buy.stripe.com/7sY9AT3Wt09Y9La9L88Vi01',
     // Código de promoción de Stripe (cupón "Plus-Descuento", $750 fijos, solo Autocheck-Plus) que
-    // baja el precio a $1,499. Solo se aplica desde la pantalla de "se agotaron tus autochecks".
+    // baja el precio a $1,499. Se aplica en todos los botones de compra (banner y pantalla de límite).
     codigoPrecioEspecialPlus: 'PLUS750',
   };
 
@@ -1067,7 +1074,7 @@
   const LIMITE_AUTOCHECKS_GRATIS = 3;
 
   document.getElementById('banner-limite-btn').addEventListener('click', async () => {
-    window.location.href = await ligaCompraPlus(false);
+    window.location.href = await ligaCompraPlus(true);
   });
 
   // Devuelve cuántos autochecks ya usó el correo autenticado, su cupo extra comprado,
