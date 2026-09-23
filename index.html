@@ -1012,9 +1012,17 @@
     if (!leadId) return;
     try {
       await supabaseClient.rpc('marcar_interes_cta', { p_id: leadId, p_tipo: tipo });
+      sincronizarHubspot();
     } catch (e) {
       console.error(e);
     }
+  }
+
+  // Manda a HubSpot el contacto del usuario con sesión (datos del autocheck, membresía) y mueve
+  // su negocio en el pipeline REGISTRO CNE. Fire-and-forget: nunca bloquea al usuario.
+  function sincronizarHubspot() {
+    supabaseClient.functions.invoke('sincronizar-hubspot', { body: {} })
+      .catch((err) => console.error('No se pudo sincronizar con HubSpot:', err));
   }
 
   // Límite de autochecks gratuitos + cupo extra comprado (Autocheck-Plus, +5 por compra,
@@ -1568,6 +1576,7 @@
 
     correoYaVerificado = true;
     clearInterval(cooldownTimer);
+    sincronizarHubspot();
     pantallaOtp.style.display = 'none';
 
     const uso = await obtenerUsoAutochecks();
@@ -1904,6 +1913,7 @@
         fortalezas: fortalezas,
       },
     }).catch((err) => console.error('No se pudo enviar el reporte por correo:', err));
+    sincronizarHubspot();
 
     // Tus Datos: resumen de lo capturado (escapado, ya que viene de campos libres).
     const empresaSeg = escapeHtml(registro.empresa || '');

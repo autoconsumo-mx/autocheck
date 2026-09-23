@@ -283,7 +283,25 @@ async function procesarCompra(supabaseAdmin: Supa, correo: string, nombre: strin
     errores.push("correo: " + String((e as Error)?.message || e));
   }
 
+  if (!(await sincronizarHubspot(correo))) errores.push("hubspot: no se sincronizó (ver logs de sincronizar-hubspot)");
+
   return { ok: true, correo, cupo_extra_total: nuevoCupo, ticket: ticket && { folio: ticket.folio, codigo: ticket.codigo }, correo_enviado: correoEnviado, aviso_ticket_manual: avisoEnviado, errores };
+}
+
+// Pasa la compra a HubSpot (nivel Member Plus, negocio a "Compra"). No bloquea la compra si falla.
+async function sincronizarHubspot(correo: string) {
+  try {
+    const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/sincronizar-hubspot`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ correo }),
+    });
+    if (!res.ok) console.error("sincronizar-hubspot respondió", res.status, await res.text());
+    return res.ok;
+  } catch (e) {
+    console.error("No se pudo llamar a sincronizar-hubspot:", e);
+    return false;
+  }
 }
 
 async function manejarStripe(req: Request, supabaseAdmin: Supa, firma: string) {
