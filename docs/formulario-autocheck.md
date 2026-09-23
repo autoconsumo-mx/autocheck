@@ -3,7 +3,7 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
-## ⏸️ Sesión pausada — 22-sep-2026 (sesión 10) — IVA resuelto, facturación vía autofacturación de tickets Alegra; webhook con tickets Alegra DESPLEGADO
+## ⏸️ Sesión pausada — 22/23-sep-2026 (sesión 10) — Autocheck Plus en producción de punta a punta (Stripe directo + Alegra + HubSpot); lanzamiento con publicidad el 24-sep
 
 ### 1. IVA — ✅ resuelto y verificado en vivo
 Se absorbe el IVA: el cliente paga **$1,499.00** parejo. Payment Link verificado en vivo: $1,292.24 (tachado $2,155.17, "40.04% de descuento") + $206.76 IVA = **Pagar $1,499.00 MXN**. Lección: el Payment Link guarda **su propia copia** del precio — hay que editar el link, no solo el producto. Si Pre-Check PRO se quiere igual: base **$8,619.83** → $9,999.00.
@@ -73,15 +73,23 @@ Las licencias de HubSpot son Starter (Sales + Service); la acción "Enviar un we
 - ✅ **Prueba real de punta a punta OK** (23-sep, ~03:10 CDMX): Alfredo pagó $112.45 con un cupón temporal de 95% ("Sand Test", código `sandtest`) usando la liga del sitio con `client_reference_id`. Resultado: pago `pi_3UImBa…` procesado una vez, +3 a op@energie.mx, **ticket T6 creado y pagado en Alegra** (token arreglado), correo "Hola, Alfredo" con $112.45 y fecha límite 30-sep, HubSpot Member Plus / 3 disponibles, y el portal de Alegra abrió con código y fecha prellenados y encontró el ticket ($112.45). **Hallazgo:** el Payment Link mostraba la página de confirmación de Stripe en vez de redirigir a `?compra=ok` → Alfredo debe configurar "Después del pago → Redirigir". Limpieza **hecha** por Alfredo: reembolso de $112.45, cupón "Sand Test" archivado, T6 cancelado, redirección del Payment Link a `?compra=ok` configurada y Payment Link viejo de HubSpot desactivado. op@energie.mx quedó con cupo_extra 3 (se había puesto en 0 para la prueba).
 - OXXO y SPEI: **no activados todavía** (pagos diferidos); activarlos después de la prueba con tarjeta. Stripe también ofrece SPEI → podría sustituir a Mercado Pago (por decidir).
 
-### Pendientes al cierre de sesión 10 (actualizado 23-sep-2026)
-✅ **Autocheck Plus funciona de punta a punta en producción** (Stripe → +3 → ticket Alegra → correo → HubSpot). Correo de compra con el texto final de Alfredo ("Este es tu ticket digital de compra", "Score-Autocheck").
-1. **Automatizaciones** (cron diario, hasta el 31-dic-2026; son soporte de venta, no marketing): agotó sus autochecks de Plus → invitación/lista de espera Precheck PRO; compró y no usa en 14 días → recordatorio (¿también a los 28?). Borradores de texto para aprobación de Alfredo.
+### 11. Revisión previa al lanzamiento (23-sep-2026) — publicidad arranca el 24-sep
+- **Hueco de seguridad corregido** (migración `revocar_rpc_internas_publicas`): `otorgar_cupo_extra_autocheck_plus` y `obtener_webhook_compra_plus_secret` eran ejecutables por `anon`/`authenticated` vía `/rest/v1/rpc` → cualquiera podía otorgarse autochecks gratis o leer el secreto del webhook manual. Ahora solo `service_role`. Verificado: anon → 401; el webhook sigue leyendo su secreto. (Opcional: rotar el secreto del webhook manual en Vault, por si se leyó antes.)
+- Advisors restantes, aceptados: RLS sin políticas en `autocheck_membresias`, `autocheck_plus_pagos_procesados`, `hubspot_sync` (intencional: solo service_role); `contar_autochecks_usuario`, `obtener_cupo_extra_usuario`, `marcar_interes_cta` son SECURITY DEFINER pero filtran por `auth.jwt()->>'email'` (intencional); "leaked password protection" no aplica (login por OTP, sin contraseñas).
+- Sitio en producción carga sin errores de consola (`https://autocheck.autoconsumo.mx`).
+- `supabase_setup.sql` está **desactualizado**: no incluye `autocheck_membresias`, `autocheck_plus_pagos_procesados`, `hubspot_sync` ni las RPC de cupo/secreto. Regenerarlo desde el esquema vivo cuando haya tiempo.
+
+### Pendientes al cierre de sesión 10 (actualizado 23-sep-2026, noche)
+✅ **Autocheck Plus funciona de punta a punta en producción** (Stripe → +3 → ticket Alegra → correo → HubSpot). Correo de compra con el texto final de Alfredo.
+**Prioridad de Alfredo para el lanzamiento (publicidad desde el 24-sep):**
+0. **Mejorar el PDF del reporte** que se entrega por correo tras cada autocheck (`supabase/functions/enviar-reporte-autocheck`, genera un PDF de 2 páginas con pdf-lib). Alfredo aún no detalla qué mejorar → pedirle ejemplo/pantallazo y lista de cambios. Usar `preview: true` en el payload para ver el PDF sin mandar correo.
+1. **Automatizaciones** (cron diario, hasta el 31-dic-2026; soporte de venta, no marketing): agotó sus autochecks de Plus → invitación/lista de espera Precheck PRO; compró y no usa en 14 días → recordatorio (¿también a los 28?). Textos para aprobación de Alfredo.
 2. **Listas activas en HubSpot** (no urgente): Freemium, Member Plus, Member Gold, Clientes Consultoría (filtros en §9).
-3. **OXXO / SPEI** en Stripe (el webhook ya soporta pagos diferidos; activar métodos + avisar en pantalla que los autochecks llegan al pagar). Decidir si SPEI de Stripe sustituye a Mercado Pago.
-4. Código `PLUS750` sin fecha de caducidad: ¿poner 31-dic-2026 (crear código nuevo) o desactivarlo a mano?
-5. Mejora opcional: adjuntar el PDF del ticket de Alegra al correo de compra (descarga vía API poco documentada).
-6. Borrar la función `alegra-probe-temp` en Supabase (neutralizada, 410).
-7. Siguen de sesión 9: aclarar "¿unimos todo en HubSpot?" (en buena parte resuelto: HubSpot = CRM + mailing, alimentado por nuestro código). El embed `<iframe>` de HubSpot ya no aplica (se usa el Payment Link de Stripe).
+3. **OXXO / SPEI** en Stripe (el webhook ya soporta pagos diferidos). ¿SPEI de Stripe sustituye a Mercado Pago?
+4. Código `PLUS750` sin fecha de caducidad: ¿31-dic-2026 o desactivarlo a mano?
+5. Mejora opcional: adjuntar el PDF del ticket de Alegra al correo de compra.
+6. Borrar la función `alegra-probe-temp` en Supabase (si aún existe; neutralizada, 410).
+7. Regenerar `supabase_setup.sql` desde el esquema vivo.
 
 ## ⏸️ Sesión pausada — 22-sep-2026 (sesión 9) — Producto y Payment Link de Autocheck Plus confirmados en HubSpot, prefill de correo investigado, embed inline sin terminar, dos pendientes nuevos (factura fiscal, ¿unificar en HubSpot?)
 
