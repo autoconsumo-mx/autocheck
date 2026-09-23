@@ -23,7 +23,7 @@ Asunto "Tu compra de Autocheck Plus — ticket y factura". Gracias + "ya tienes 
 
 ### 5. ✅ Bloqueo resuelto (misma noche): los tickets se crean con `POST /invoices`
 - En Alegra **los tickets de venta son facturas** con numeración de tipo `saleTicket` (T1 aparece en `GET /invoices/11` con `documentType: saleTicket`). **`/sale-tickets` solo sirve para descargar PDFs**: `POST /sale-tickets` da 403 con tokens JWT y **200 con `[]` sin crear nada** con las credenciales clásicas. Los 403 de antes no eran de permisos.
-- Por decisión de Alfredo se usan temporalmente las **credenciales clásicas** (sección "Credenciales de acceso" de Alegra, acceso total) mientras soporte responde: secretos `ALEGRA_USER` + `ALEGRA_TOKEN` (auth Basic). El código acepta ambos tipos (`authAlegra()`: con `ALEGRA_USER` → Basic; sin él → Bearer/JWT). Siguiente paso de seguridad: probar `POST /invoices` con un **token JWT limitado** (Facturas: Crear + Ticket de venta + recibos de caja + lecturas) y, si funciona, quitar `ALEGRA_USER` y cambiar a ese token.
+- ✅ **Producción usa el token JWT limitado "Autocheck-Plus"** (secreto `ALEGRA_TOKEN`, auth Bearer): se probó que crea tickets vía `POST /invoices` (T3 OK) y que NO puede leer empresa/usuarios/compras/cotizaciones. Las credenciales clásicas (acceso total) solo se usaron unas horas como puente. `authAlegra()` usa Bearer si el token es JWT aunque exista `ALEGRA_USER` (Alfredo dejó ese secreto; ya no se usa). No hizo falta el soporte de Alegra.
 - **Ticket de prueba T2** creado por API (Alfredo corrió la prueba): 201, `saleTicket`, no electrónico, **sin timbre**, total $1,499 pagado ($1,499, saldo 0, estado closed), forma de pago `credit-card`, nota correcta, código + liga de autofactura. Cobro registrado en la cuenta **"Cheques BBVA" (id 5)** — confirmar con Alfredo que ahí caen los depósitos de Stripe.
 - El auto-mode classifier bloquea que Claude ejecute escrituras reales en Alegra; Alfredo corrió las pruebas en PowerShell. Tras la autorización explícita de Alfredo sí se permitió desplegar.
 
@@ -35,8 +35,7 @@ Asunto "Tu compra de Autocheck Plus — ticket y factura". Gracias + "ya tienes 
 1. Alfredo: confirmar que existe el Workflow HubSpot que llama a `webhook-compra-plus` (body: `{"correo": "{{ contact.email }}", "nombre": "{{ contact.firstname }}"}`) — sin él nada de esto corre.
 2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
 3. Confirmar cuenta de cobros en Alegra ("Cheques BBVA", id 5).
-4. Seguridad: preguntar a soporte / probar `POST /invoices` con token JWT limitado → migrar y quitar credenciales clásicas.
-5. Limpieza: borrar `alegra-probe-temp`; anular T1 y T2 en Alegra; borrar tokens JWT sin uso ("Autocheck-Plus", y "Autochek-full" que tiene todos los permisos).
+4. Limpieza: borrar `alegra-probe-temp`; anular T1, T2 y T3 en Alegra; borrar el token JWT "Autochek-full" (todos los permisos); opcional borrar secreto `ALEGRA_USER` y "Renovar token" de las credenciales clásicas si nada más las usa.
 6. Siguen de sesión 9: embed `<iframe>` con prefill de correo; aclarar "¿unimos todo en HubSpot?".
 
 ## ⏸️ Sesión pausada — 22-sep-2026 (sesión 9) — Producto y Payment Link de Autocheck Plus confirmados en HubSpot, prefill de correo investigado, embed inline sin terminar, dos pendientes nuevos (factura fiscal, ¿unificar en HubSpot?)

@@ -14,9 +14,9 @@
 //   Method: POST
 //   Body (JSON): {"correo": "{{ contact.email }}", "nombre": "{{ contact.firstname }}"}
 //
-// Alegra: secretos de Edge Functions ALEGRA_TOKEN (+ ALEGRA_USER si es el token clásico),
-// ver authAlegra(). Si Alegra o el correo fallan, el cupo ya quedó otorgado: el error
-// se registra en logs y se regresa en la respuesta, pero no se revierte la compra.
+// Alegra: secreto de Edge Functions ALEGRA_TOKEN (token JWT limitado), ver authAlegra().
+// Si Alegra o el correo fallan, el cupo ya quedó otorgado: el error se registra en logs
+// y se regresa en la respuesta, pero no se revierte la compra.
 // Respaldo: si no se pudo crear el ticket en Alegra, el cliente recibe una confirmación sin
 // ticket y ayuda@mail.autoconsumo.mx un aviso para crear el ticket a mano.
 
@@ -73,11 +73,12 @@ function ultimoDiaDelMes(iso: string) {
   return `${a}-${String(m).padStart(2, "0")}-${String(ultimo).padStart(2, "0")}`;
 }
 
-// Token clásico de Alegra (acceso total): ALEGRA_USER (correo) + ALEGRA_TOKEN, auth Basic.
-// Token nuevo con permisos granulares (JWT): solo ALEGRA_TOKEN, auth Bearer.
+// Token JWT con permisos granulares (el que se usa, "Autocheck-Plus"): auth Bearer.
+// Token clásico de Alegra (acceso total, solo de respaldo): ALEGRA_USER (correo) + ALEGRA_TOKEN, auth Basic.
 function authAlegra() {
   const token = (Deno.env.get("ALEGRA_TOKEN") || "").trim();
   if (!token) throw new Error("Falta el secreto ALEGRA_TOKEN");
+  if (token.split(".").length === 3) return `Bearer ${token}`;
   const usuario = (Deno.env.get("ALEGRA_USER") || "").trim();
   return usuario ? `Basic ${btoa(`${usuario}:${token}`)}` : `Bearer ${token}`;
 }
