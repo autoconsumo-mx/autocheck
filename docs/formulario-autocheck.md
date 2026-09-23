@@ -63,9 +63,18 @@ Las licencias de HubSpot son Starter (Sales + Service); la acción "Enviar un we
 - Listas activas por nivel: las crea Alfredo en la UI (el MCP solo crea listas estáticas). **No son prioridad hoy (decisión de Alfredo, 23-sep) → pendiente.** Filtros: "Nivel de membresía es Freemium / Member Plus / Member Gold" y "Cliente consultoría es True".
 - **Criterio de correos (Alfredo, 23-sep):** los correos de **marketing** (novedades, temas) salen de **HubSpot**, que ya trae el botón de darse de baja. Los correos automáticos del Autocheck (recordatorios de usar autochecks, invitación a Precheck PRO al agotarlos) son **soporte de venta, no marketing**: no requieren el enlace de baja propio y son menos críticos. La propiedad `baja_correos_autocheck` queda creada pero sin uso por ahora.
 
+### 10. ✅ Paso 2: Autocheck Plus directo en Stripe (23-sep-2026, commit `caae049`)
+- **El paquete ahora da +3 autochecks** (antes 5), consistente con los 3 gratuitos (decisión de Alfredo).
+- **Precios:** lista **$2,249 MXN** (IVA incluido); con el código **`PLUS750`** (cupón "Plus-Descuento", $750 fijos, solo producto Autocheck-Plus, sin fecha de caducidad por ahora) queda en **$1,499**. El código se aplica solo desde la pantalla "se agotaron tus autochecks" (vía `prefilled_promo_code`); el botón "¿Necesitas más?" del banner cobra $2,249.
+- **Stripe:** producto `prod_VJO3JBee1Xqffz` (precio $2,249, impuestos incluidos), Payment Link `plink_1UIleqGRDIXTxh30iZmHBwEI` = `https://buy.stripe.com/7sY9AT3Wt09Y9La9L88Vi01` (solo tarjeta, códigos de promoción, redirige a `?compra=ok`, sin "cobrar impuestos automáticamente" — Stripe Tax cobra comisión y el IVA oficial lo desglosa Alegra). El enlace viejo de $1,499 se reemplazó.
+- **Sitio:** `ligaCompraPlus()` arma la liga con `prefilled_email` y `client_reference_id` = id de la cuenta (así los autochecks van a esa cuenta aunque escriba otro correo). Aviso verde al volver con `?compra=ok`.
+- **Webhook:** eventos de Stripe cambiados a `checkout.session.completed` + `checkout.session.async_payment_succeeded` (ya no `charge.succeeded`). Filtra por el Payment Link, solo procesa `payment_status` paid/no_payment_required (listo para OXXO/SPEI), cuenta por `client_reference_id`, ticket y correo con el **monto real pagado**, código del 100% → otorga sin ticket.
+- **Token de Alegra** "Autocheck-Plus" editado: ahora ve facturas y recibos de caja (antes 403 → tickets T4/T5 sin pagar). Falta confirmar con una compra que crea el ticket pagado.
+- OXXO y SPEI: **no activados todavía** (pagos diferidos); activarlos después de la prueba con tarjeta. Stripe también ofrece SPEI → podría sustituir a Mercado Pago (por decidir).
+
 ### Pendientes al cierre de sesión 10
-1. Alfredo: crear el webhook en Stripe (evento `charge.succeeded` → URL de `webhook-compra-plus`) y guardar su signing secret como `STRIPE_WEBHOOK_SECRET` en Supabase — sin esto nada corre (HubSpot Starter no tiene workflows con webhook).
-2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
+1. ✅ Webhook de Stripe creado ("autocheck-plus-compras") y `STRIPE_WEBHOOK_SECRET` guardado. Alfredo: **desactivar el Payment Link de Autocheck Plus en HubSpot** (ya no se usa).
+2. Compra real de punta a punta con `PLUS750` ($1,499 → +3 → ticket pagado en Alegra → correo → HubSpot Member Plus) y reembolso.
 3. Confirmar cuenta de cobros en Alegra ("Cheques BBVA", id 5).
 4. Alfredo (no urgente): crear en HubSpot las 4 listas activas (Freemium, Member Plus, Member Gold, Clientes Consultoría), filtros en §9.
 4b. Limpieza: borrar la función `alegra-probe-temp` en Supabase (neutralizada, 410); cancelar T4, T5 y el borrador en Alegra; opcional "Renovar token" de las credenciales clásicas si nada más las usa. (Ya hecho: `alegra-probe-temp` borrada, token "Autochek-full" borrado, secreto `ALEGRA_USER` borrado — solo queda `ALEGRA_TOKEN` = JWT "Autocheck-Plus".)
