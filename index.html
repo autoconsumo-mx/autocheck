@@ -84,6 +84,11 @@
   }
   .banner-limite-btn:hover { background: var(--naranja); color: #fff; }
 
+  .aviso-compra {
+    background: #EAF7EE; border-left: 3px solid #2E9E5B; border-radius: 6px;
+    padding: 10px 14px; margin: 0 0 16px; font-size: 14px; color: var(--texto);
+  }
+
   .limite-ilustracion { display: block; width: 100%; max-width: 420px; margin: 0 auto 20px; border-radius: 12px; }
   .limite-plus-card {
     background: #FAFAFB; border: 1px solid var(--borde); border-radius: 12px;
@@ -496,6 +501,10 @@
     <p class="subtitulo">Portal de autoevaluación previa | Para conocer tu estatus y riesgos antes del registro de instalaciones de autoconsumo en la CNE</p>
   </div>
 
+  <p class="aviso-compra" id="aviso-compra-ok" role="status" style="display:none;">
+    ¡Gracias por tu compra! Tus 3 autochecks adicionales ya están en tu cuenta. Entra con tu correo para usarlos; en unos minutos te llega por correo tu ticket para facturar.
+  </p>
+
   <div class="pantalla-acceso" id="pantalla-acceso">
     <h2>Entra a tu Autocheck</h2>
     <p class="subtitulo">Ingresa el correo con el que te suscribiste. Te enviaremos un código de acceso.</p>
@@ -517,14 +526,14 @@
   <div class="pantalla-acceso" id="pantalla-limite-alcanzado" style="display:none;">
     <img src="assets/autocheck-plus-ilustracion.webp" alt="" class="limite-ilustracion">
     <h2>Se han agotado tus 3 Auto-Check gratuitos</h2>
-    <p class="subtitulo" id="limite-alcanzado-texto">Adquiere un paquete de 5 usos más:</p>
+    <p class="subtitulo" id="limite-alcanzado-texto">Adquiere un paquete de 3 usos más:</p>
 
     <div class="limite-plus-card">
       <div class="limite-plus-titulo">AUTO-CHECK PLUS</div>
-      <div class="limite-plus-desc">+5 autochecks adicionales</div>
+      <div class="limite-plus-desc">+3 autochecks adicionales</div>
       <div class="limite-plus-precios">
-        <span class="limite-precio-normal">Precio normal: $2,500 MXN</span>
-        <span class="limite-precio-especial">Precio especial para miembros: $1,499 MXN <small>(IVA incluido)</small></span>
+        <span class="limite-precio-normal">Precio normal: $2,249 MXN</span>
+        <span class="limite-precio-especial">Tu precio especial: $1,499 MXN <small>(IVA incluido)</small></span>
       </div>
       <a class="btn-siguiente limite-btn-comprar" id="btn-limite-comprar-plus" href="#">COMPRAR AUTOCHECK PLUS</a>
     </div>
@@ -996,10 +1005,38 @@
     urlAgendarCita: 'https://meetings.hubspot.com/autoconsumo/registro_cne',
     urlAsistenciaPersonalizada: 'https://payments-na1.hubspot.com/payments/9XQrvkQHJGqY6?referrer=PAYMENT_LINK',
     urlRegistroCne: 'https://registroautoconsumo.cne.gob.mx/',
-    // TODO(Alfredo): reemplaza por el Payment Link real de "Autocheck Plus" (+5 autochecks,
-    // $1,499 + IVA) en cuanto lo crees en HubSpot (Commerce → Payment Links).
-    urlAutocheckPlus: 'mailto:contacto@mail.autoconsumo.mx?subject=' + encodeURIComponent('Quiero Autocheck Plus (+5 autochecks)'),
+    // Payment Link de Stripe de "Autocheck Plus" (+3 autochecks, $2,249 IVA incluido). La compra
+    // la procesa la Edge Function webhook-compra-plus (evento de Stripe), ver ligaCompraPlus().
+    urlAutocheckPlus: 'https://buy.stripe.com/7sY9AT3Wt09Y9La9L88Vi01',
+    // Código de promoción de Stripe (cupón "Plus-Descuento", $750 fijos, solo Autocheck-Plus) que
+    // baja el precio a $1,499. Solo se aplica desde la pantalla de "se agotaron tus autochecks".
+    codigoPrecioEspecialPlus: 'PLUS750',
   };
+
+  // Liga al checkout de Autocheck Plus con el correo de la sesión prellenado y el id de la cuenta
+  // en client_reference_id: así el webhook acredita los autochecks a esta cuenta aunque el cliente
+  // escriba otro correo al pagar. conPrecioEspecial aplica el código de descuento de una vez.
+  async function ligaCompraPlus(conPrecioEspecial) {
+    const params = new URLSearchParams();
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      const usuario = data && data.session && data.session.user;
+      if (usuario) {
+        if (usuario.email) params.set('prefilled_email', usuario.email);
+        params.set('client_reference_id', usuario.id);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    if (conPrecioEspecial) params.set('prefilled_promo_code', CONFIG_SIGUIENTES_PASOS.codigoPrecioEspecialPlus);
+    const query = params.toString();
+    return CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus + (query ? '?' + query : '');
+  }
+
+  // Regreso del checkout de Stripe (el Payment Link redirige a ?compra=ok).
+  if (new URLSearchParams(window.location.search).get('compra') === 'ok') {
+    document.getElementById('aviso-compra-ok').style.display = 'block';
+  }
 
   function determinarTierResultado(alertasRojas, alertasAmarillas, porcentajePuntaje) {
     if (alertasRojas.length > 0) return 'critico';
@@ -1025,14 +1062,13 @@
       .catch((err) => console.error('No se pudo sincronizar con HubSpot:', err));
   }
 
-  // Límite de autochecks gratuitos + cupo extra comprado (Autocheck-Plus, +5 por compra,
+  // Límite de autochecks gratuitos + cupo extra comprado (Autocheck-Plus, +3 por compra,
   // acumulable — ver public.autocheck_membresias / obtener_cupo_extra_usuario() en Supabase).
   const LIMITE_AUTOCHECKS_GRATIS = 3;
 
-  document.getElementById('banner-limite-btn').addEventListener('click', () => {
-    window.location.href = CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus;
+  document.getElementById('banner-limite-btn').addEventListener('click', async () => {
+    window.location.href = await ligaCompraPlus(false);
   });
-  document.getElementById('btn-limite-comprar-plus').href = CONFIG_SIGUIENTES_PASOS.urlAutocheckPlus;
 
   // Devuelve cuántos autochecks ya usó el correo autenticado, su cupo extra comprado,
   // y el límite total (3 + cupo extra). Si algo falla, deja pasar (no bloquea por un
@@ -1582,7 +1618,8 @@
     const uso = await obtenerUsoAutochecks();
     if (uso.ok && uso.usados >= uso.limite) {
       document.getElementById('limite-alcanzado-texto').textContent =
-        `Ya usaste tus ${uso.limite} autochecks disponibles con este correo (${uso.usados} realizados). Adquiere Autocheck-Plus para desbloquear 5 más al instante.`;
+        `Ya usaste tus ${uso.limite} autochecks disponibles con este correo (${uso.usados} realizados). Adquiere Autocheck-Plus para desbloquear 3 más al instante.`;
+      document.getElementById('btn-limite-comprar-plus').href = await ligaCompraPlus(true);
       document.getElementById('pantalla-limite-alcanzado').style.display = 'block';
       return;
     }
