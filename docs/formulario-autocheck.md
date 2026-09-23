@@ -60,13 +60,15 @@ Las licencias de HubSpot son Starter (Sales + Service); la acción "Enviar un we
 - **Edge Function `sincronizar-hubspot`** (verify_jwt): recalcula todo desde la BD y hace upsert del contacto por correo + crea/mueve su negocio en REGISTRO CNE (freemium → autocheck generado → compra → sesión agendada; solo avanza y no toca etapas manuales). Tabla nueva `hubspot_sync` (correo → contacto_id, negocio_id). Si HubSpot rechaza `entidad`/`combustibles`, reintenta sin ellas.
 - **Disparadores**: el sitio (`index.html`, `sincronizarHubspot()`) al verificar el OTP, al terminar un autocheck y al tocar "Agenda una consulta" (con la sesión del usuario: solo su propio correo); `webhook-compra-plus` tras cada compra (con service_role).
 - Carga inicial hecha de las 2 cuentas existentes: op@energie.mx (Member Plus, etapa Compra, datos completos verificados en HubSpot) y contenidosfactory@gmail.com (Freemium, sin autocheck).
-- Listas activas por nivel: las crea Alfredo en la UI (el MCP solo crea listas estáticas).
+- Listas activas por nivel: las crea Alfredo en la UI (el MCP solo crea listas estáticas). **No son prioridad hoy (decisión de Alfredo, 23-sep) → pendiente.** Filtros: "Nivel de membresía es Freemium / Member Plus / Member Gold" y "Cliente consultoría es True".
+- **Criterio de correos (Alfredo, 23-sep):** los correos de **marketing** (novedades, temas) salen de **HubSpot**, que ya trae el botón de darse de baja. Los correos automáticos del Autocheck (recordatorios de usar autochecks, invitación a Precheck PRO al agotarlos) son **soporte de venta, no marketing**: no requieren el enlace de baja propio y son menos críticos. La propiedad `baja_correos_autocheck` queda creada pero sin uso por ahora.
 
 ### Pendientes al cierre de sesión 10
 1. Alfredo: crear el webhook en Stripe (evento `charge.succeeded` → URL de `webhook-compra-plus`) y guardar su signing secret como `STRIPE_WEBHOOK_SECRET` en Supabase — sin esto nada corre (HubSpot Starter no tiene workflows con webhook).
 2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
 3. Confirmar cuenta de cobros en Alegra ("Cheques BBVA", id 5).
-4. Limpieza: anular T1, T2 y T3 en Alegra; opcional "Renovar token" de las credenciales clásicas si nada más las usa. (Ya hecho: `alegra-probe-temp` borrada, token "Autochek-full" borrado, secreto `ALEGRA_USER` borrado — solo queda `ALEGRA_TOKEN` = JWT "Autocheck-Plus".)
+4. Alfredo (no urgente): crear en HubSpot las 4 listas activas (Freemium, Member Plus, Member Gold, Clientes Consultoría), filtros en §9.
+4b. Limpieza: borrar la función `alegra-probe-temp` en Supabase (neutralizada, 410); cancelar T4, T5 y el borrador en Alegra; opcional "Renovar token" de las credenciales clásicas si nada más las usa. (Ya hecho: `alegra-probe-temp` borrada, token "Autochek-full" borrado, secreto `ALEGRA_USER` borrado — solo queda `ALEGRA_TOKEN` = JWT "Autocheck-Plus".)
 5. Siguen de sesión 9: embed `<iframe>` con prefill de correo; aclarar "¿unimos todo en HubSpot?".
 
 ## ⏸️ Sesión pausada — 22-sep-2026 (sesión 9) — Producto y Payment Link de Autocheck Plus confirmados en HubSpot, prefill de correo investigado, embed inline sin terminar, dos pendientes nuevos (factura fiscal, ¿unificar en HubSpot?)
