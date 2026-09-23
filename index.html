@@ -705,7 +705,7 @@
           <label><input type="radio" name="permiso_distribuidor" value="si"> Sí</label>
           <label><input type="radio" name="permiso_distribuidor" value="no"> No</label>
         </div>
-        <div class="alerta amarilla" id="alerta-permiso-distribuidor">Es importante identificarlo claramente antes de iniciar el registro.</div>
+        <div class="alerta roja" id="alerta-permiso-distribuidor">Es importante identificarlo claramente antes de iniciar el registro.</div>
       </div>
 
       <div class="campo">
@@ -737,7 +737,7 @@
           <label><input type="radio" name="relacion_vehiculos" value="si"> Sí</label>
           <label><input type="radio" name="relacion_vehiculos" value="no"> No</label>
         </div>
-        <div class="alerta amarilla" id="alerta-relacion-vehiculos">Es importante que la construyas antes del registro.</div>
+        <div class="alerta roja" id="alerta-relacion-vehiculos">Es importante que la construyas antes del registro.</div>
       </div>
 
       <div class="campo">
@@ -1127,32 +1127,55 @@
     operando: 'Tu instalación está en operación.',
   };
 
-  // Texto declarativo del PROBLEMA real detrás de cada alerta (roja/amarilla) — se antepone,
-  // en negritas, al texto de la alerta tanto en pantalla como en los reportes (correo/PDF).
+  // Mensaje de cada alerta en la pantalla de resultado y en el PDF: la situación (en negritas)
+  // seguida del consejo. El aviso corto dentro del formulario (<div class="alerta">) no cambia.
   // Las llaves coinciden con los mismos nombres de campo que FORTALEZAS_TEXTO.
   const PROBLEMA_TEXTO = {
-    tiene_permiso: 'Ya cuentas con un permiso vigente (SENER, CRE o CNE), lo cual hace que esta instalación no sea elegible para el registro de autoconsumo.',
-    titulo_predio: 'No cuentas con un título de propiedad o contrato que acredite el uso legal del predio.',
-    tiene_planos: 'No cuentas con planos de la instalación.',
-    factura_tanque: 'No cuentas con factura o garantía del tanque y las instalaciones.',
-    tres_facturas: 'No cuentas con al menos tres facturas de combustible de este año.',
-    permiso_distribuidor: 'No cuentas con el número de permiso de tu distribuidor de combustible.',
-    controles_volumetricos: 'No estás reportando tus controles volumétricos al SAT.',
-    surte_propios: 'Surtes combustible a vehículos que no son de tu propia empresa.',
-    relacion_vehiculos: 'No tienes una relación exacta de los vehículos que abastece la instalación.',
-    operando: 'La instalación no se encuentra operando actualmente.',
+    tiene_permiso: '¡Ya tienes un permiso vigente!',
+    tres_facturas: 'No tienes al menos tres facturas de combustible de este año.',
+    surte_propios: '¡Surtes combustible a vehículos que no son de tu empresa!',
+    operando: 'La instalación no está operando.',
+    clausura_sancion: 'La instalación está bajo un procedimiento de clausura o sanción.',
+    titulo_predio: 'No tienes título de propiedad ni contrato del predio.',
+    tiene_planos: 'No tienes planos de la instalación.',
+    factura_tanque: 'No tienes factura ni garantía del tanque y las instalaciones.',
+    permiso_distribuidor: 'No conoces el número de permiso de tu distribuidor.',
+    controles_volumetricos: 'No reportas controles volumétricos al SAT.',
+    relacion_vehiculos: 'No tienes una relación exacta de los vehículos que abasteces.',
     inspeccion_asea: 'Has recibido visitas o inspecciones de la ASEA.',
     inspeccion_cne: 'Has recibido visitas o inspecciones de la CNE.',
-    inspeccion_fiscalia: 'Has recibido visitas o inspecciones de la Fiscalía, el Ministerio Público o la Guardia Nacional.',
-    clausura_sancion: 'La instalación está bajo un procedimiento de clausura o sanción.',
-    solicitud_previa: 'Has presentado solicitudes de permiso ante la CRE o CNE que quedaron pendientes o no se resolvieron favorablemente.',
-    permiso_negado: 'Te han negado permisos o autorizaciones respecto de esta instalación en el pasado.',
-    interes_permiso: 'No tienes interés en gestionar un permiso definitivo después del registro.',
+    inspeccion_fiscalia: 'Has recibido visitas o inspecciones de la Fiscalía, el MP o la Guardia Nacional.',
+    solicitud_previa: 'Ya presentaste solicitudes de permiso ante la CRE o la CNE.',
+    permiso_negado: 'Te han negado permisos o autorizaciones para esta instalación.',
+    interes_permiso: 'No te interesa gestionar un permiso definitivo.',
+    tanques: 'Declaraste más combustibles que tanques.',
+  };
+
+  const CONSEJO_TEXTO = {
+    tiene_permiso: 'Las instalaciones con permiso no pueden gestionar el registro CNE.',
+    tres_facturas: 'Sin ellas no puedes gestionar el registro, pero aún puedes facturar combustible antes del 31 de diciembre.',
+    surte_propios: 'Así no podrás obtener el registro y estás en un riesgo regulatorio grave.',
+    operando: 'Sin operar no puedes obtener el registro. Verifica si puedes operar antes del 31 de diciembre.',
+    clausura_sancion: 'Revisa su estatus legal cuanto antes: registrar datos e información puede significar un riesgo mayor o puede comprometer tus defensas legales.',
+    titulo_predio: 'Es importante documentar con claridad con qué título ocupas el predio.',
+    tiene_planos: 'Es importante hacerlos, al menos una memoria documental, antes del registro CNE.',
+    factura_tanque: 'Hay que elaborar una descripción del tanque lo más detallada y certera posible, para el registro CNE.',
+    permiso_distribuidor: 'Identifícalo antes de iniciar el registro. Es un dato muy importante que puede significar un riesgo alto.',
+    controles_volumetricos: 'Si has consumido más de 75 mil litros en un solo mes, es indispensable que instales esos controles, para evitar una sanción fiscal grave.',
+    relacion_vehiculos: 'Hazla antes del registro. Es de alto riesgo no incluirla.',
+    inspeccion_asea: 'Revisa su estatus para evitar complicaciones futuras. El mayor riesgo es incurrir en contradicciones frente a las autoridades.',
+    inspeccion_cne: 'Revisa su estatus para evitar complicaciones futuras. El mayor riesgo es incurrir en contradicciones frente a las autoridades.',
+    inspeccion_fiscalia: 'Revisa su estatus para evitar complicaciones futuras. El mayor riesgo es incurrir en contradicciones frente a las autoridades.',
+    solicitud_previa: 'Revisa su fecha de ingreso y su estatus actual. Puede existir un riesgo de inconsistencia en tus declaraciones y datos. Revísalo bien.',
+    permiso_negado: 'La CNE podría cruzar esos antecedentes con tu registro. Se puede documentar un periodo de operación irregular, de fácil comprobación para la autoridad. Revisa este punto con detalle.',
+    interes_permiso: 'Toma en cuenta que el registro tiene como finalidad gestionar permisos en el futuro. El Registro es solo temporal. La CNE dará por concluidos los efectos del Registro en algún momento y solo podrás operar con un permiso definitivo.',
+    tanques: 'Debes tener al menos un tanque por cada combustible. Revisa la información.',
   };
 
   // Relaciona el id de cada <div class="alerta"> con el nombre de campo usado en PROBLEMA_TEXTO
   // (los ids no siempre siguen el mismo patrón que el name= del campo, p.ej. "alerta-planos" -> "tiene_planos").
   const ALERTA_ID_A_CAMPO = {
+    'alerta-tanques': 'tanques',
     'alerta-tiene-permiso': 'tiene_permiso',
     'alerta-titulo-predio': 'titulo_predio',
     'alerta-planos': 'tiene_planos',
@@ -1176,8 +1199,8 @@
   // Se usa tanto para pintar los <li> en pantalla como para las cadenas que se mandan
   // a la función de Supabase (alertas_rojas / alertas_amarillas), que alimentan el PDF.
   function textoAlertaConProblema(el) {
-    const texto = el.textContent.trim();
     const campo = ALERTA_ID_A_CAMPO[el.id];
+    const texto = (campo && CONSEJO_TEXTO[campo]) || el.textContent.trim();
     const problema = campo ? PROBLEMA_TEXTO[campo] : null;
     if (problema) return `${problema} ${texto}`;
     return `Punto a revisar: ${texto}`;
@@ -1209,7 +1232,7 @@
     const construirLiCaja = (el) => {
       const campoAlerta = ALERTA_ID_A_CAMPO[el.id];
       const problema = campoAlerta ? PROBLEMA_TEXTO[campoAlerta] : null;
-      const textoAlerta = escapeHtml(el.textContent.trim());
+      const textoAlerta = escapeHtml((campoAlerta && CONSEJO_TEXTO[campoAlerta]) || el.textContent.trim());
       if (problema) {
         return `<li><strong>${escapeHtml(problema)}</strong> ${textoAlerta}</li>`;
       }
@@ -1962,8 +1985,8 @@
     if (registro.combustibles.length) {
       datosLista.push(`<li>Combustible: ${escapeHtml(registro.combustibles.join(', '))}</li>`);
     }
-    datosLista.push(`<li>${registro.cantidad_tanques} tanque(s) — capacidad: ${registro.capacidad_tanques.map(c => escapeHtml(String(c)) + ' L').join(', ')}</li>`);
-    datosLista.push(`<li>Antigüedad de la instalación: ${registro.antiguedad_anios} año(s)</li>`);
+    datosLista.push(`<li>${registro.cantidad_tanques} tanque${registro.cantidad_tanques == 1 ? '' : 's'} — capacidad: ${registro.capacidad_tanques.map(c => escapeHtml(String(c)) + ' L').join(', ')}</li>`);
+    datosLista.push(`<li>Antigüedad de la instalación: ${registro.antiguedad_anios} año${registro.antiguedad_anios == 1 ? '' : 's'}</li>`);
 
     // Mensaje del nivel, ya SIN el saludo/nombre concatenado (ver nombrePila abajo, que ahora
     // se manda por separado a renderResultadoCompleto para pintarse en negritas al inicio).
