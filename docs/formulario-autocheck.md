@@ -24,6 +24,7 @@ Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones 
 
 ### Pendientes al cierre de sesión 11
 Siguen los de la sesión 10 (§ abajo) salvo el 0 (PDF, hecho). **Siguiente paso acordado: correos automáticos** (recordatorio a 14 días sin usar autochecks + invitación/lista de espera Precheck PRO al agotarlos) — empezar pasando los textos a Alfredo para aprobación. Después: listas de HubSpot, OXXO/SPEI, caducidad de `PLUS750` (más relevante ahora que todas las compras del sitio lo usan), ticket de Alegra adjunto, regenerar `supabase_setup.sql`.
+- **Admin de Alfredo (dashboard interno) para ver el uso de la herramienta — pendiente, anotado otra vez a petición de Alfredo al cierre de sesión 11.** Ya hay mockup (`docs/mockups/dashboard-interno-mockup.png`, sesión 8) y spec en la sección "Dashboard interno (staff)" más abajo; revisarlos con Alfredo antes de construir.
 - Menor: el correo del reporte inserta el nombre de la instalación en el HTML sin escapar (solo se lo manda el usuario a sí mismo); el título "Puntos adecuados" del PDF no coincide con "Fortalezas y checks" del sitio.
 
 ## ⏸️ Sesión pausada — 22/23-sep-2026 (sesión 10) — Autocheck Plus en producción de punta a punta (Stripe directo + Alegra + HubSpot); lanzamiento con publicidad el 24-sep
