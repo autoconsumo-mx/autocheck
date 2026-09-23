@@ -54,6 +54,14 @@ Las licencias de HubSpot son Starter (Sales + Service); la acción "Enviar un we
 
 **Orden acordado:** (1) Autocheck → HubSpot; (2) Autocheck Plus directo en Stripe (token Alegra nuevo con permisos de lectura de facturas y recibos + botón del sitio); (3) automatizaciones; (4) prueba de punta a punta.
 
+### 9. ✅ Paso 1 hecho: Autocheck → HubSpot (23-sep-2026, commit `8e86f4b`)
+- **41 propiedades de contacto** creadas en HubSpot (grupo "Información personalizada"): `nivel_membresia` (freemium/plus/gold, solo sube), `cliente_consultoria`, `interes_precheck_pro`, `autochecks_realizados`, `autochecks_disponibles`, `fecha_ultimo_autocheck`, `fecha_compra_autocheck_plus`, `baja_correos_autocheck`, `ultimo_interes_cta`, y 32 `ac_*` con los datos del último autocheck. Se reutilizan las existentes `company`, `entidad`, `combustibles` (Diesel→Diésel, GLP→Gas LP), `hs_whatsapp_phone_number` (sí es escribible por API) y `mobilephone`. Las booleanas quedaron con etiquetas True/False.
+- **Clave de servicio** de HubSpot (no app privada; HubSpot la recomienda) "Autocheck (supabase)" con `crm.objects.contacts.read/write` + `crm.objects.deals.read/write`, en el secreto `HUBSPOT_TOKEN`.
+- **Edge Function `sincronizar-hubspot`** (verify_jwt): recalcula todo desde la BD y hace upsert del contacto por correo + crea/mueve su negocio en REGISTRO CNE (freemium → autocheck generado → compra → sesión agendada; solo avanza y no toca etapas manuales). Tabla nueva `hubspot_sync` (correo → contacto_id, negocio_id). Si HubSpot rechaza `entidad`/`combustibles`, reintenta sin ellas.
+- **Disparadores**: el sitio (`index.html`, `sincronizarHubspot()`) al verificar el OTP, al terminar un autocheck y al tocar "Agenda una consulta" (con la sesión del usuario: solo su propio correo); `webhook-compra-plus` tras cada compra (con service_role).
+- Carga inicial hecha de las 2 cuentas existentes: op@energie.mx (Member Plus, etapa Compra, datos completos verificados en HubSpot) y contenidosfactory@gmail.com (Freemium, sin autocheck).
+- Listas activas por nivel: las crea Alfredo en la UI (el MCP solo crea listas estáticas).
+
 ### Pendientes al cierre de sesión 10
 1. Alfredo: crear el webhook en Stripe (evento `charge.succeeded` → URL de `webhook-compra-plus`) y guardar su signing secret como `STRIPE_WEBHOOK_SECRET` en Supabase — sin esto nada corre (HubSpot Starter no tiene workflows con webhook).
 2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
