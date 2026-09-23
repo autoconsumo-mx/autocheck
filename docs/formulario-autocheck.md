@@ -29,13 +29,13 @@ Asunto "Tu compra de Autocheck Plus — ticket y factura". Gracias + "ya tienes 
 
 ### 6. ✅ Webhook extendido DESPLEGADO en producción
 `webhook-compra-plus` (repo = producción): +5 → ticket en Alegra (`POST /invoices`, numeración 2, ítem 14, IVA 2, pago tarjeta cuenta 5, nota "Pagado con tarjeta…") → correo con código, fecha, fecha límite y botón al portal prellenado. **Respaldo**: si Alegra falla, el cliente recibe confirmación sin ticket ("te llega en máx. un día hábil") y ayuda@ recibe aviso con el correo del comprador para hacer el ticket a mano. Siempre responde 200 tras otorgar el cupo (evita que HubSpot reintente y dé 10). Verificado que arranca (sin secreto → 401). **No probado aún con una compra real.**
-`alegra-probe-temp` neutralizada (410); borrarla desde el dashboard.
+`alegra-probe-temp` ya borrada.
 
 ### Pendientes al cierre de sesión 10
 1. Alfredo: confirmar que existe el Workflow HubSpot que llama a `webhook-compra-plus` (body: `{"correo": "{{ contact.email }}", "nombre": "{{ contact.firstname }}"}`) — sin él nada de esto corre.
 2. Compra real de punta a punta ($1,499 → cupo → ticket → correo → autofactura).
 3. Confirmar cuenta de cobros en Alegra ("Cheques BBVA", id 5).
-4. Limpieza: borrar `alegra-probe-temp`; anular T1, T2 y T3 en Alegra; borrar el token JWT "Autochek-full" (todos los permisos); opcional borrar secreto `ALEGRA_USER` y "Renovar token" de las credenciales clásicas si nada más las usa.
+4. Limpieza: anular T1, T2 y T3 en Alegra; opcional "Renovar token" de las credenciales clásicas si nada más las usa. (Ya hecho: `alegra-probe-temp` borrada, token "Autochek-full" borrado, secreto `ALEGRA_USER` borrado — solo queda `ALEGRA_TOKEN` = JWT "Autocheck-Plus".)
 6. Siguen de sesión 9: embed `<iframe>` con prefill de correo; aclarar "¿unimos todo en HubSpot?".
 
 ## ⏸️ Sesión pausada — 22-sep-2026 (sesión 9) — Producto y Payment Link de Autocheck Plus confirmados en HubSpot, prefill de correo investigado, embed inline sin terminar, dos pendientes nuevos (factura fiscal, ¿unificar en HubSpot?)
