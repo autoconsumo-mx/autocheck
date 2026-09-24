@@ -3,6 +3,53 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## ⏸️ Sesión pausada — 24-sep-2026 (sesión 12) — Copia interna por autocheck, UTM de campañas, Panel interno (staff) construido, vista previa de la liga en WhatsApp/redes
+
+Primer día de publicidad (arrancó el 24-sep). Antes de tocar nada se revisaron los logs de `enviar-reporte-autocheck`, `webhook-compra-plus` y `sincronizar-hubspot`: sin errores nuevos desde el cierre de sesión 11.
+
+### 1. Correos de nurture — propuestos, NO aprobados ni construidos
+Se propusieron los 2 textos (recordatorio a 14 días sin usar autochecks; invitación/lista de espera a Precheck PRO al agotarlos), con el mismo tono que el correo de compra. **Alfredo no los ha aprobado.** Sigue sin resolverse: ¿1 o 2 recordatorios (14 y 28 días)?, y cómo el botón "Avísame cuando esté listo" de Precheck PRO marca interés sin que el usuario tenga que iniciar sesión (se propuso una liga con token único por destinatario, sin decidir). **Este pendiente sigue abierto, no se construyó nada.**
+
+### 2. Copia interna por cada autocheck generado — ✅ construido y en producción (commit `49cfec3`)
+`enviar-reporte-autocheck` ahora, además del reporte al cliente, manda copia a **`autocheck@mail.autoconsumo.mx`** con el PDF adjunto y el cuerpo "Nombre, de la empresa X, con la instalación Y, de Estado, ha generado un autocheck (N/M)." — N/M (usados/límite = 3 + cupo_extra) se calcula en el servidor desde Supabase, no depende de lo que mande el cliente. Envuelto en try/catch: si falla, no afecta el correo del cliente. **Pendiente de Alfredo: confirmar que ese buzón sí recibe correo** (no probado con un envío real).
+
+Decisión de Alfredo sobre el significado de estos avisos: un usuario con 1 autocheck **no** es lead calificado todavía — solo al 2°/3° hay señal real de interés. Anotado como contexto para cuando se prioricen leads; no se tocó la lógica del pipeline de HubSpot por esto.
+
+### 3. UTM de campañas (Instagram/Facebook/LinkedIn) — ✅ construido y en producción (mismo commit)
+- 3 columnas nuevas en `leads_autocheck_estaciones`: `utm_source`, `utm_medium`, `utm_campaign`.
+- `index.html` captura esos parámetros de la URL de entrada y los guarda en `sessionStorage` (sobrevive el redirect del OTP) para incluirlos en el `registro` al insertar.
+- `sincronizar-hubspot` sube `utm_source` a una propiedad de contacto nueva en HubSpot (mismo nombre `utm_source`, grupo `custom_information`, creada por API).
+- **Aclarado con Alfredo cómo funciona su embudo real:** los anuncios de Instagram/Facebook/LinkedIn van **directo** al formulario del Autocheck (no pasan por la homepage de autoconsumo.mx) — así que cada anuncio solo necesita su propio `?utm_source=instagram`/`facebook`/`linkedin` en su liga de destino, sin necesidad de ningún script de traspaso. El botón de la homepage (que sí manda a `autocheck.autoconsumo.mx` desde una página compartida) lleva `?utm_source=website` para distinguirlo. Ninguna de estas ligas se puso todavía dentro de las plataformas de anuncios — **pendiente de Alfredo terminarlo ahí** (Meta Ads Manager / LinkedIn Campaign Manager / editor de la homepage).
+- **Confirmado 24-sep:** publicidad activa en LinkedIn e Instagram (Facebook sin confirmar). A media tarde seguían **cero autochecks reales** (ver "Estado al cierre" abajo) — normal si las ligas con `utm_source` aún no se han puesto, o si la campaña sigue en revisión/arrancando.
+
+### 4. Panel interno (staff) — ✅ construido, desplegado y probado en vivo (commit `61fa977` + `f79fb69`)
+Se retomó el mockup de sesión 8 (`docs/mockups/dashboard-interno-mockup.png`) y se revisó con Alfredo antes de construir. Decisiones tomadas (reemplazan las preguntas abiertas de la sección "Dashboard interno (staff)" más abajo, que queda obsoleta):
+- **Acceso:** tabla nueva `autocheck_staff` (correo autorizado) en vez de correo fijo en código — más flexible para agregar gente después. Hoy solo `autoconsumo@energie.mx`.
+- **PreCheck-Pro** en la tarjeta "Resultados" queda fijo en 0 (no existe ese dato todavía — depende del pendiente #1 de esta sesión). Autocheck Plus sí es real (cuenta compradores en `autocheck_plus_pagos_procesados`/`autocheck_membresias`). Agenda Consulta cuenta los 4 `interes_cta` que empiezan con `agendar_cita_*` (únicos que existen hoy; los otros dos nombres del mockup no correspondían a datos reales, se descartó esa suposición).
+- **Columna "Mpio"** se omitió (el formulario no captura municipio).
+- **Columnas G/D/LP** confirmadas como palomitas de combustible marcado; se agregó una cuarta, **GN** (Gas Natural), que el mockup no traía pero sí existe como opción en el formulario.
+
+Construcción: Edge Function **`panel-interno`** (verify_jwt, valida el correo de la sesión contra `autocheck_staff` con service_role antes de leer nada — nunca se abrió RLS de `leads_autocheck_estaciones` a `authenticated`) + página nueva **`panel.html`** (login por OTP igual que el sitio, botón "Cerrar sesión" agregado después de que Alfredo notó que la sesión se queda guardada en el navegador — es esperado, mismo dominio que el sitio, pero se agregó por comodidad). Probado en vivo por Alfredo con su propio correo: login, datos reales de la única cuenta de prueba, todo cuadrando.
+
+**Liga: `https://autocheck.autoconsumo.mx/panel.html`**
+
+### 5. Vista previa al compartir la liga (WhatsApp/Facebook/LinkedIn) — ✅ construido y verificado (commit `bb6b594`)
+`index.html` no tenía ninguna etiqueta Open Graph/Twitter Card — por eso al pegar la liga en WhatsApp no aparecía nada. Se agregaron `og:title`/`og:description`/`og:image`/`twitter:*`, con una imagen nueva `assets/og-image.jpg` (1200×630, recorte de la ilustración de marca que ya existía en `assets/autocheck-plus-ilustracion.webp`, generada con un canvas en el navegador ya que no había herramienta de conversión de imágenes disponible). Verificado en producción: la imagen responde 200, `image/jpeg`, tamaño correcto. Si el enlace ya se había compartido antes sin vista previa, hay que forzar el refresco del caché en `developers.facebook.com/tools/debug` ("Scrape Again" — WhatsApp usa el mismo caché).
+
+### Hallazgo menor: `alegra-probe-temp` sigue activa
+La documentación de sesión 10 decía "ya borrada", pero sigue **ACTIVE** en Supabase (neutralizada, responde 410, no es un riesgo). Pendiente de limpieza cosmética, no urgente.
+
+### Estado al cierre de sesión (24-sep-2026, media tarde)
+Sitio, Autocheck Plus, PDF, panel interno y vista previa de la liga — todo funcionando en producción. **Cero autochecks reales desde que arrancó la publicidad** (solo la cuenta de prueba `op@energie.mx`, sin cambios desde ayer) — confirmado con logs (ni un solo intento de OTP nuevo). Con LinkedIn e Instagram ya activos según Alfredo, siguiente paso al retomar: confirmar en las plataformas de anuncios si ya hay impresiones/clics (para saber si el problema es de entrega del anuncio o de otra cosa), y que Alfredo termine de poner las ligas con `utm_source` en cada anuncio y en el botón de la homepage.
+
+### Pendientes al cierre de sesión 12
+1. **Nurture emails** — aprobar textos, decidir 1 vs 2 recordatorios, decidir mecanismo del botón de Precheck PRO. Sigue siendo el pendiente de mayor prioridad de negocio.
+2. Confirmar que `autocheck@mail.autoconsumo.mx` recibe correo.
+3. Alfredo: poner `?utm_source=instagram`/`facebook`/`linkedin`/`website` en las ligas reales (anuncios + botón de la homepage) — nada de esto se ha puesto todavía.
+4. Confirmar en Meta Ads Manager / LinkedIn Campaign Manager el estado real de las campañas (activo/revisión/impresiones) dado que sigue en cero.
+5. Borrar `alegra-probe-temp`.
+6. Los de siempre, sin tocar esta sesión: listas activas de HubSpot, OXXO/SPEI, caducidad de `PLUS750`, `supabase_setup.sql` desactualizado (ahora también le faltan `autocheck_staff`, las columnas `utm_*` y el esquema de `panel-interno`), adjuntar PDF del ticket de Alegra al correo de compra.
+
 ## ⏸️ Sesión pausada — 23-sep-2026 (sesión 11) — PDF del reporte rediseñado, mensajes de alertas reescritos y cupón en el banner (todo en producción, listo para la publicidad del 24-sep)
 
 ### 1. Mensajes de alertas (sitio + PDF) — ✅ textos de Alfredo
@@ -635,8 +682,8 @@ Al agotar los 3 autochecks gratis, el sitio ahora bloquea de verdad la entrada a
 Alfredo definió un producto nuevo y distinto de "precheck" (el viejo, $9,499/año, ya obsoleto): **Precheck Pro** — el usuario sube sus documentos reales y se validan con participación de abogados + IA, todo digital, evaluación profunda entregada en 48 horas. Precio $25,000 MXN normal / $14,999 MXN precio miembros (IVA incluido). **Vive en su propio portal** (no en `autocheck.autoconsumo.mx`) — Autocheck solo lo ofrecerá como cross-sell ("vía de maximización") una vez que ese portal exista.
 **Explícitamente NO incluir todavía:** se había agregado por error un link a "Precheck Pro" en la pantalla de Autocheck Plus (sesión 8) y Alfredo pidió quitarlo — commit `84c5147` lo revirtió. Meta de Alfredo: incorporarlo antes del 25-sep-2026. Cuando se retome: el portal de Precheck Pro es un proyecto aparte (no construir aquí), solo agregar el cross-sell/link desde Autocheck una vez que exista.
 
-## Dashboard interno (staff) — spec pendiente, NO empezado a construir
-Alfredo compartió un mockup el 21-sep-2026 (sesión 8) de un dashboard interno que quiere para sí mismo — ver imagen guardada en `docs/mockups/dashboard-interno-mockup.png`. **Solo se anotó el requerimiento; a petición explícita de Alfredo ("no rompas el flujo de trabajo") no se tocó código ni se empezó a construir nada de esto todavía.** Queda ligado al pendiente #6 de la lista de abajo.
+## Dashboard interno (staff) — ✅ construido en sesión 12 (24-sep-2026), ver esa sección arriba
+Alfredo compartió un mockup el 21-sep-2026 (sesión 8) de un dashboard interno que quiere para sí mismo — ver imagen guardada en `docs/mockups/dashboard-interno-mockup.png`. **Construido y en producción en la sesión 12** (`panel.html` + Edge Function `panel-interno`, tabla `autocheck_staff`) — el detalle de campos de abajo queda solo como referencia histórica de la lectura del mockup; las decisiones finales (acceso, PreCheck-Pro en 0, sin columna Mpio, G/D/LP/GN) están en la sección de sesión 12.
 
 Lectura del mockup, campo por campo (para cuando se retome):
 - **Encabezado:** logo + "autoconsumo.mx" + "Autocheck de Registro".
@@ -657,7 +704,7 @@ Lectura del mockup, campo por campo (para cuando se retome):
 3. ~~Probar end-to-end limpio la función de envío de PDF/correo tras el fix de Site URL/SMTP~~ — ✅ hecho en sesión 7 (correo de prueba `op@energie.mx`). De paso se encontró y corrigió una API key de Resend inválida en el Vault (independiente del SMTP) y se corrigió una inconsistencia de color entre el medidor del sitio y el del PDF — ver detalle en la sección de sesión 7 arriba.
 4. ~~Decidir Opción A vs B para la plantilla "Confirm sign up"~~ — ✅ decidido, codificado, **verificado en vivo** y con los tres ajustes de dashboard ya cerrados en sesión 8 (21-sep-2026): Opción A con auto-envío del OTP al confirmar, probado de punta a punta con un alta real; plantilla+subject de "Confirm signup" y subject de "Magic Link" ya en español; dominio `autoconsumo.mx` verificado en Resend (descarta DNS como causa del spam). Solo falta confirmar con una prueba real nueva que el correo de "Confirm signup" ya no caiga en spam — ver detalle en "Verificación por OTP" arriba.
 5. Confirmar que las franjas del medidor y los bloqueos duros reflejan lo que el equipo espera.
-6. Construir un dashboard interno (staff) para ver los autochecks — Alfredo compartió un mockup el 21-sep-2026 (sesión 8), ver `docs/mockups/dashboard-interno-mockup.png` y el detalle de campos en "Dashboard interno (staff) — spec pendiente" más abajo. **Todavía no se empezó a construir** — solo quedó anotado el requerimiento, a petición explícita de Alfredo de no interrumpir el flujo de trabajo en curso.
+6. ~~Construir un dashboard interno (staff) para ver los autochecks~~ — ✅ hecho en sesión 12 (24-sep-2026): `panel.html` + Edge Function `panel-interno`, ver esa sección.
 7. Decidir si "acceso directo" sin correo encontrado debe saltar automático a suscripción.
 8. Construir la Edge Function que normalice webhooks de Stripe/Mercado Pago.
 9. ~~Detallar la membresía "gold"/plus~~ — parcialmente resuelto en sesión 8 (21-sep-2026): "Autocheck Plus" (+5 autochecks, $1,499 MXN miembros) ya definido, construido y en producción — ver "Autocheck Plus" en Monetización y pagos. Sigue sin definir una membresía "gold" más amplia (boletines, etc.) más allá de este cupo extra.
