@@ -40,6 +40,11 @@
   #pantalla-acceso button:disabled { opacity: .6; cursor: default; }
   #acceso-mensaje { min-height: 18px; font-size: 13px; margin-top: 10px; color: var(--rojo); }
 
+  .barra-superior { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 8px; }
+  .barra-superior span { font-size: 13px; color: var(--gris); }
+  .barra-superior button { padding: 7px 14px; border: 1px solid var(--borde); border-radius: 8px; background: #fff; color: var(--texto); font-size: 13px; cursor: pointer; }
+  .barra-superior button:hover { border-color: var(--naranja); color: var(--naranja); }
+
   .tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   @media (max-width: 680px) { .tarjetas { grid-template-columns: 1fr; } }
   .tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 18px 20px; }
@@ -90,6 +95,10 @@
   </div>
 
   <div id="pantalla-panel">
+    <div class="barra-superior">
+      <span id="v-correo-sesion"></span>
+      <button type="button" id="btn-cerrar-sesion">Cerrar sesión</button>
+    </div>
     <div class="tarjetas">
       <div class="tarjeta">
         <h2>Usuarios y Autochecks</h2>
@@ -211,6 +220,9 @@
     pantallaAcceso.style.display = 'none';
     pantallaPanel.style.display = 'block';
 
+    const { data: userData } = await supabaseClient.auth.getUser();
+    document.getElementById('v-correo-sesion').textContent = userData?.user?.email || '';
+
     document.getElementById('v-total-suscriptores').textContent = datos.usuarios.total_suscriptores;
     document.getElementById('v-autochecks-ejecutados').textContent = datos.usuarios.autochecks_ejecutados;
     document.getElementById('v-con-1').textContent = datos.usuarios.con_1;
@@ -252,6 +264,18 @@
       tbody.appendChild(tr);
     }
   }
+
+  document.getElementById('btn-cerrar-sesion').addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    pantallaPanel.style.display = 'none';
+    pantallaSinAcceso.style.display = 'none';
+    pantallaAcceso.style.display = 'block';
+    document.getElementById('paso-codigo').style.display = 'none';
+    document.getElementById('paso-correo').style.display = 'block';
+    document.getElementById('input-correo').value = '';
+    document.getElementById('input-codigo').value = '';
+    mensaje.textContent = '';
+  });
 
   // Si ya hay sesión activa (recargó la página), entra directo sin pedir OTP de nuevo.
   supabaseClient.auth.getSession().then(({ data }) => {
