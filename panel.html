@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel interno — autoconsumo.mx</title>
+<style>
+  :root {
+    --naranja: #FF6600;
+    --naranja-oscuro: #d95500;
+    --texto: #2b2b2b;
+    --gris: #6b7280;
+    --borde: #e2e2e2;
+    --fondo: #f7f7f8;
+    --rojo: #c0392b;
+    --amarillo: #92700a;
+    --verde: #0ca30c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  header {
+    text-align: center;
+    padding: 28px 16px 18px;
+  }
+  header .logo { color: var(--naranja); font-weight: 800; font-size: 22px; }
+  header h1 { margin: 4px 0 0; font-size: 16px; font-weight: 600; color: var(--texto); }
+
+  .envoltura { max-width: 1000px; margin: 0 auto; padding: 0 16px 60px; }
+
+  #pantalla-acceso { max-width: 360px; margin: 60px auto; background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 24px; }
+  #pantalla-acceso label { display: block; font-size: 13px; color: var(--gris); margin-bottom: 6px; }
+  #pantalla-acceso input { width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 8px; font-size: 15px; margin-bottom: 14px; }
+  #pantalla-acceso button { width: 100%; padding: 11px; border: none; border-radius: 8px; background: var(--naranja); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+  #pantalla-acceso button:disabled { opacity: .6; cursor: default; }
+  #acceso-mensaje { min-height: 18px; font-size: 13px; margin-top: 10px; color: var(--rojo); }
+
+  .tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  @media (max-width: 680px) { .tarjetas { grid-template-columns: 1fr; } }
+  .tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 18px 20px; }
+  .tarjeta h2 { margin: 0 0 12px; font-size: 15px; }
+  .tarjeta .fila { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+  .tarjeta .fila span:last-child { font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; background: #fff; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+  th { color: var(--gris); font-weight: 600; font-size: 12px; }
+  .tabla-envoltura { overflow-x: auto; border: 1px solid var(--borde); border-radius: 12px; background: #fff; margin-top: 16px; }
+  .tabla-envoltura h2 { padding: 16px 16px 0; margin: 0; font-size: 15px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .pill.plus { background: #fff6dd; color: var(--amarillo); }
+  .pill.free { background: #eee; color: var(--gris); }
+  .ok { color: var(--verde); font-weight: 700; }
+  .no { color: #ccc; }
+
+  #pantalla-panel, #pantalla-sin-acceso { display: none; }
+  #pantalla-sin-acceso { max-width: 400px; margin: 60px auto; text-align: center; color: var(--gris); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">autoconsumo.mx</div>
+  <h1>Panel interno — Autocheck de Registro</h1>
+</header>
+
+<div class="envoltura">
+
+  <div id="pantalla-acceso">
+    <div id="paso-correo">
+      <label for="input-correo">Correo de staff</label>
+      <input type="email" id="input-correo" placeholder="tu@correo.mx" autocomplete="email">
+      <button type="button" id="btn-enviar-codigo">Enviar código</button>
+    </div>
+    <div id="paso-codigo" style="display:none">
+      <label for="input-codigo">Código que te llegó por correo</label>
+      <input type="text" id="input-codigo" inputmode="numeric" placeholder="12345678">
+      <button type="button" id="btn-verificar-codigo">Entrar</button>
+    </div>
+    <p id="acceso-mensaje"></p>
+  </div>
+
+  <div id="pantalla-sin-acceso">
+    <p>Este correo no tiene acceso al panel interno.</p>
+  </div>
+
+  <div id="pantalla-panel">
+    <div class="tarjetas">
+      <div class="tarjeta">
+        <h2>Usuarios y Autochecks</h2>
+        <div class="fila"><span>Total de suscriptores</span><span id="v-total-suscriptores">—</span></div>
+        <div class="fila"><span>Autochecks ejecutados</span><span id="v-autochecks-ejecutados">—</span></div>
+        <div class="fila"><span>Usuarios con 1 autocheck</span><span id="v-con-1">—</span></div>
+        <div class="fila"><span>Usuarios con 2 autochecks</span><span id="v-con-2">—</span></div>
+        <div class="fila"><span>Usuarios con 3+ autochecks</span><span id="v-con-3-mas">—</span></div>
+      </div>
+      <div class="tarjeta">
+        <h2>Calidad de autochecks</h2>
+        <div class="fila"><span>Total de autochecks</span><span id="v-calidad-total">—</span></div>
+        <div class="fila"><span>Con alerta crítica</span><span id="v-alerta-critica">—</span></div>
+        <div class="fila"><span>Con advertencias</span><span id="v-advertencias">—</span></div>
+        <div class="fila"><span>Sin alertas ni advertencias</span><span id="v-sin-alertas">—</span></div>
+      </div>
+      <div class="tarjeta">
+        <h2>Resultados</h2>
+        <div class="fila"><span>Autocheck Plus (compraron)</span><span id="v-autocheck-plus">—</span></div>
+        <div class="fila"><span>PreCheck-Pro</span><span id="v-precheck-pro">—</span></div>
+        <div class="fila"><span>Agenda Consulta</span><span id="v-agenda-consulta">—</span></div>
+      </div>
+      <div class="tarjeta">
+        <h2>Regiones</h2>
+        <div id="v-regiones"></div>
+      </div>
+    </div>
+
+    <div class="tabla-envoltura">
+      <h2>Miembros / Usuarios</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Correo</th><th>Alta</th><th>Member</th><th>Autochecks</th>
+            <th>Nick</th><th>Edo</th><th>G</th><th>D</th><th>LP</th><th>GN</th>
+          </tr>
+        </thead>
+        <tbody id="v-miembros"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qdelfelmvwnehyzfzrav.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZWxmZWxtdnduZWh5emZ6cmF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MzY2MDgsImV4cCI6MjEwNTIxMjYwOH0.tkQjlTAMEaFi7tuAs305ZQT4E7kC9A9a0VaeMEL_8PA';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const pantallaAcceso = document.getElementById('pantalla-acceso');
+  const pantallaSinAcceso = document.getElementById('pantalla-sin-acceso');
+  const pantallaPanel = document.getElementById('pantalla-panel');
+  const mensaje = document.getElementById('acceso-mensaje');
+
+  let correoActual = '';
+
+  document.getElementById('btn-enviar-codigo').addEventListener('click', async () => {
+    const correo = document.getElementById('input-correo').value.trim();
+    if (!correo) return;
+    correoActual = correo;
+    mensaje.style.color = 'var(--gris)';
+    mensaje.textContent = 'Enviando código…';
+    const { error } = await supabaseClient.auth.signInWithOtp({ email: correo, options: { shouldCreateUser: true } });
+    if (error) {
+      mensaje.style.color = 'var(--rojo)';
+      mensaje.textContent = 'No se pudo enviar el código. Intenta de nuevo.';
+      return;
+    }
+    mensaje.style.color = 'var(--gris)';
+    mensaje.textContent = 'Código enviado. Revisa tu correo.';
+    document.getElementById('paso-correo').style.display = 'none';
+    document.getElementById('paso-codigo').style.display = 'block';
+  });
+
+  document.getElementById('btn-verificar-codigo').addEventListener('click', async () => {
+    const codigo = document.getElementById('input-codigo').value.trim();
+    if (!codigo) return;
+    mensaje.style.color = 'var(--gris)';
+    mensaje.textContent = 'Verificando…';
+    const { data, error } = await supabaseClient.auth.verifyOtp({ email: correoActual, token: codigo, type: 'email' });
+    if (error || !data.session) {
+      mensaje.style.color = 'var(--rojo)';
+      mensaje.textContent = 'Código incorrecto o vencido.';
+      return;
+    }
+    cargarPanel(data.session.access_token);
+  });
+
+  function fila(estado, total) {
+    const div = document.createElement('div');
+    div.className = 'fila';
+    div.innerHTML = `<span>${estado}</span><span>${total}</span>`;
+    return div;
+  }
+
+  function marca(si) {
+    return si ? '<span class="ok">✓</span>' : '<span class="no">—</span>';
+  }
+
+  async function cargarPanel(accessToken) {
+    mensaje.textContent = '';
+    const res = await fetch(SUPABASE_URL + '/functions/v1/panel-interno', {
+      headers: { Authorization: 'Bearer ' + accessToken, apikey: SUPABASE_ANON_KEY },
+    });
+    const datos = await res.json().catch(() => ({}));
+
+    if (res.status === 403) {
+      pantallaAcceso.style.display = 'none';
+      pantallaSinAcceso.style.display = 'block';
+      return;
+    }
+    if (!res.ok || !datos.ok) {
+      mensaje.style.color = 'var(--rojo)';
+      mensaje.textContent = 'No se pudo cargar el panel. Intenta de nuevo.';
+      return;
+    }
+
+    pantallaAcceso.style.display = 'none';
+    pantallaPanel.style.display = 'block';
+
+    document.getElementById('v-total-suscriptores').textContent = datos.usuarios.total_suscriptores;
+    document.getElementById('v-autochecks-ejecutados').textContent = datos.usuarios.autochecks_ejecutados;
+    document.getElementById('v-con-1').textContent = datos.usuarios.con_1;
+    document.getElementById('v-con-2').textContent = datos.usuarios.con_2;
+    document.getElementById('v-con-3-mas').textContent = datos.usuarios.con_3_mas;
+
+    document.getElementById('v-calidad-total').textContent = datos.calidad.total;
+    document.getElementById('v-alerta-critica').textContent = datos.calidad.con_alerta_critica;
+    document.getElementById('v-advertencias').textContent = datos.calidad.con_advertencias;
+    document.getElementById('v-sin-alertas').textContent = datos.calidad.sin_alertas;
+
+    document.getElementById('v-autocheck-plus').textContent = datos.resultados.autocheck_plus;
+    document.getElementById('v-precheck-pro').textContent = datos.resultados.precheck_pro;
+    document.getElementById('v-agenda-consulta').textContent = datos.resultados.agenda_consulta;
+
+    const regionesEl = document.getElementById('v-regiones');
+    regionesEl.innerHTML = '';
+    if (datos.regiones.length === 0) regionesEl.appendChild(fila('Sin datos todavía', ''));
+    for (const r of datos.regiones) regionesEl.appendChild(fila(r.estado, r.total));
+
+    const tbody = document.getElementById('v-miembros');
+    tbody.innerHTML = '';
+    for (const m of datos.miembros) {
+      const tr = document.createElement('tr');
+      const alta = m.alta ? new Date(m.alta).toLocaleDateString('es-MX') : '—';
+      tr.innerHTML = `
+        <td>${m.nombre || '—'}</td>
+        <td>${m.correo}</td>
+        <td>${alta}</td>
+        <td><span class="pill ${m.member}">${m.member === 'plus' ? 'Plus' : 'Free'}</span></td>
+        <td>${m.autochecks_usados} de ${m.autochecks_limite}</td>
+        <td>${m.nick || '—'}</td>
+        <td>${m.estado || '—'}</td>
+        <td>${marca(m.gasolina)}</td>
+        <td>${marca(m.diesel)}</td>
+        <td>${marca(m.gas_lp)}</td>
+        <td>${marca(m.gas_natural)}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // Si ya hay sesión activa (recargó la página), entra directo sin pedir OTP de nuevo.
+  supabaseClient.auth.getSession().then(({ data }) => {
+    if (data.session) cargarPanel(data.session.access_token);
+  });
+</script>
+
+</body>
+</html>
