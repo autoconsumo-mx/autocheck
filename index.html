@@ -999,6 +999,23 @@
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  // Guarda de qué red/campaña llegó (utm_source/medium/campaign de la liga del anuncio) la
+  // primera vez que entra. Se guarda en sessionStorage porque el redirect de confirmación/OTP
+  // pierde los parámetros de la URL original antes de que el usuario termine el autocheck.
+  (function capturarUTM() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      ['utm_source', 'utm_medium', 'utm_campaign'].forEach((clave) => {
+        const valor = params.get(clave);
+        if (valor) sessionStorage.setItem('autocheck_' + clave, valor.slice(0, 100));
+      });
+    } catch (e) { /* sessionStorage puede fallar en modo privado; no es crítico */ }
+  })();
+  function obtenerUTM() {
+    const leer = (clave) => { try { return sessionStorage.getItem('autocheck_' + clave) || null; } catch (e) { return null; } };
+    return { utm_source: leer('utm_source'), utm_medium: leer('utm_medium'), utm_campaign: leer('utm_campaign') };
+  }
+
   // -----------------------------------------------------------------
   // CONFIG de "siguientes pasos" — ligas y precios de los CTA que
   // aparecen según el resultado del autocheck (ver autocheck ideas.pdf).
@@ -1881,6 +1898,7 @@
 
     const registro = {
       ...(leadId ? { id: leadId } : {}),
+      ...obtenerUTM(),
       empresa: document.getElementById('empresa').value.trim(),
       nombre_instalacion: document.getElementById('nombre_instalacion').value.trim() || null,
       nombre_contacto: document.getElementById('nombre_contacto').value.trim(),

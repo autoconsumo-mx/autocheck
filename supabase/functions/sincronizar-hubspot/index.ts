@@ -106,6 +106,7 @@ async function sincronizar(supabaseAdmin: Supa, correo: string) {
     combustibles: Array.isArray(ultimo?.combustibles)
       ? [...new Set(ultimo.combustibles.map((c: string) => COMBUSTIBLES[String(c).toLowerCase()] || "Otros"))].join(";")
       : undefined,
+    utm_source: ultimo?.utm_source,
   });
   const propiedades = sinVacios({
     email: correo,

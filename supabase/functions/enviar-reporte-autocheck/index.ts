@@ -12,6 +12,19 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const RESEND_FROM_EMAIL = "autocheck@autoconsumo.mx";
 const RESEND_FROM_NAME = "Autocheck · autoconsumo.mx";
+const CORREO_INTERNO = "autocheck@mail.autoconsumo.mx";
+const LIMITE_AUTOCHECKS_GRATIS = 3;
+
+const ORIGEN_LABEL: Record<string, string> = {
+  instagram: "Instagram",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
+  google: "Google",
+};
+
+function escaparHtml(t: unknown): string {
+  return String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
 
 // Poppins (tipografía de la marca) para el encabezado y el banner. Se sirve desde el propio
 // sitio (assets/fonts, licencia OFL). Si no se puede descargar, el PDF sale con Helvetica.
@@ -598,18 +611,18 @@ async function buildAutocheckPdf(payloadOriginal: Payload, poppins: Poppins | nu
   return await doc.save();
 }
 
-async function enviarCorreo(payload: Payload, pdfBytes: Uint8Array, resendKey: string) {
+function pdfABase64(pdfBytes: Uint8Array): string {
+  let binary = "";
+  const chunk = 8192;
+  for (let i = 0; i < pdfBytes.length; i += chunk) {
+    binary += String.fromCharCode(...pdfBytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+async function enviarCorreo(payload: Payload, base64Pdf: string, resendKey: string) {
   const primerNombre = (payload.nombre_contacto || "").trim().split(/\s+/)[0] || "";
   const nick = payload.nombre_instalacion || payload.empresa || "tu instalación";
-  let base64Pdf = "";
-  {
-    let binary = "";
-    const chunk = 8192;
-    for (let i = 0; i < pdfBytes.length; i += chunk) {
-      binary += String.fromCharCode(...pdfBytes.subarray(i, i + chunk));
-    }
-    base64Pdf = btoa(binary);
-  }
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -626,6 +639,41 @@ async function enviarCorreo(payload: Payload, pdfBytes: Uint8Array, resendKey: s
   if (!res.ok) {
     throw new Error(`Resend respondió ${res.status}: ${JSON.stringify(data)}`);
   }
+  return data;
+}
+
+// Copia interna para Alfredo: le avisa cada vez que alguien genera un autocheck, con cuántos
+// lleva de su límite (gratis + cupo extra) y, si se sabe, de qué red llegó (utm_source).
+async function enviarCopiaInterna(
+  payload: Payload,
+  base64Pdf: string,
+  resendKey: string,
+  info: { usados: number; limite: number; origen: string | null },
+) {
+  const nombre = escaparHtml(payload.nombre_contacto || "(sin nombre)");
+  const empresa = escaparHtml(payload.empresa || "(sin empresa)");
+  const instalacion = escaparHtml(payload.nombre_instalacion || "(sin nombre de instalación)");
+  const estado = escaparHtml(payload.estado || "(sin estado)");
+  const origenTexto = info.origen ? (ORIGEN_LABEL[info.origen.toLowerCase()] || escaparHtml(info.origen)) : null;
+
+  const html = `
+<p><strong>${nombre}</strong>, de la empresa <strong>${empresa}</strong>, con la instalación <strong>${instalacion}</strong>, de <strong>${estado}</strong>, ha generado un autocheck (${info.usados}/${info.limite}).</p>
+${origenTexto ? `<p>Llegó desde: <strong>${origenTexto}</strong></p>` : ""}
+<p>Aquí está la copia.</p>`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
+      to: [CORREO_INTERNO],
+      subject: `Autocheck generado (${info.usados}/${info.limite}) — ${payload.empresa || payload.nombre_contacto || "sin nombre"}`,
+      html,
+      attachments: [{ filename: "autocheck.pdf", content: base64Pdf }],
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Resend (copia interna) respondió ${res.status}: ${JSON.stringify(data)}`);
   return data;
 }
 
@@ -649,7 +697,30 @@ Deno.serve(async (req: Request) => {
       throw new Error("No se pudo obtener la API key de Resend: " + (keyErr?.message || "no configurada"));
     }
 
-    const emailResult = await enviarCorreo(payload, pdfBytes, resendKey as string);
+    const base64Pdf = pdfABase64(pdfBytes);
+    const emailResult = await enviarCorreo(payload, base64Pdf, resendKey as string);
+
+    // Copia interna para Alfredo (cuántos autochecks lleva + de qué red llegó). No debe tumbar
+    // la respuesta al usuario si falla: éste ya tiene su reporte en camino.
+    try {
+      const correoNorm = payload.correo.trim().toLowerCase();
+      const [{ data: filas, count }, { data: membresia }] = await Promise.all([
+        supabaseAdmin
+          .from("leads_autocheck_estaciones")
+          .select("utm_source", { count: "exact" })
+          .ilike("correo", correoNorm)
+          .order("created_at", { ascending: false })
+          .limit(1),
+        supabaseAdmin.from("autocheck_membresias").select("cupo_extra").eq("correo", correoNorm).maybeSingle(),
+      ]);
+      const usados = count ?? 1;
+      const limite = LIMITE_AUTOCHECKS_GRATIS + (membresia?.cupo_extra ?? 0);
+      const origen = filas?.[0]?.utm_source ?? null;
+      await enviarCopiaInterna(payload, base64Pdf, resendKey as string, { usados, limite, origen });
+    } catch (e) {
+      console.error("No se pudo enviar la copia interna:", e);
+    }
+
     return new Response(JSON.stringify({ ok: true, email: emailResult }), { headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });
   } catch (e) {
     console.error(e);
