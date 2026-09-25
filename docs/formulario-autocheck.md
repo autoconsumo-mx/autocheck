@@ -39,16 +39,27 @@ Construcción: Edge Function **`panel-interno`** (verify_jwt, valida el correo d
 ### Hallazgo menor: `alegra-probe-temp` sigue activa
 La documentación de sesión 10 decía "ya borrada", pero sigue **ACTIVE** en Supabase (neutralizada, responde 410, no es un riesgo). Pendiente de limpieza cosmética, no urgente.
 
-### Estado al cierre de sesión (24-sep-2026, media tarde)
-Sitio, Autocheck Plus, PDF, panel interno y vista previa de la liga — todo funcionando en producción. **Cero autochecks reales desde que arrancó la publicidad** (solo la cuenta de prueba `op@energie.mx`, sin cambios desde ayer) — confirmado con logs (ni un solo intento de OTP nuevo). Con LinkedIn e Instagram ya activos según Alfredo, siguiente paso al retomar: confirmar en las plataformas de anuncios si ya hay impresiones/clics (para saber si el problema es de entrega del anuncio o de otra cosa), y que Alfredo termine de poner las ligas con `utm_source` en cada anuncio y en el botón de la homepage.
+### 6. Diagnóstico en vivo de las campañas — cero autochecks reales, causa encontrada
+Con la publicidad ya corriendo (LinkedIn e Instagram, Facebook sin campaña separada por ahora), a media tarde del 24-sep seguían **0 autochecks reales** (solo la cuenta de prueba `op@energie.mx`, sin cambios). Se investigó junto con Alfredo, revisando capturas de cada plataforma en vivo:
+
+- **Sitio/función:** descartado como causa — se probó `autocheck.autoconsumo.mx` como visita nueva (sin `localStorage`/`sessionStorage`), simulando celular, sin errores de consola; el flujo hasta el formulario de suscripción (empresa/nombre/correo/whatsapp/aviso) funciona normal. Logs de Supabase confirman **cero intentos de OTP** de nadie más que las pruebas de Alfredo — no es que la gente falle al verificar, es que nadie ni siquiera pide el código.
+- **LinkedIn:** campaña "autocheck", objetivo "Visitas al sitio web" (categoría "Percepción"). 3 anuncios activos, ~3,552 impresiones, 16 "visitas al sitio web" reportadas, $24 USD gastados. Se encontró un error aparte ("presupuesto restante insuficiente para lanzar el conjunto de anuncios") al querer lanzar un conjunto de anuncios adicional dentro de la misma campaña — no afectaba a los 3 anuncios que ya corrían, era por presupuesto de campaña agotado ($100 tope). **Alfredo subió el presupuesto en $75 para resolverlo.** LinkedIn también pide instalar su "Insight Tag" para medición confiable (no instalada aún) — sin ella, el número de "visitas" es más bien clics reportados por LinkedIn, no confirmación real de carga de página.
+- **Instagram — causa más probable encontrada:** contenido multimedia promocionado (boost de publicación, no campaña armada en Ads Manager), destino confirmado correcto: **`https://autocheck.autoconsumo.mx/?utm_source=instagram`** (Alfredo ya había puesto el UTM). Resultados: 8,972 alcance, 201 clics en el enlace, **148 visitas reales a la página de destino**, $222 (pesos) gastados en 1 día. Con 148 visitas reales y 0 conversiones, ya no es ruido estadístico. **Audiencia configurada: "todo México, 18-65, sin segmentación por interés/industria"** — para una herramienta B2B de nicho (dueños/operadores de instalaciones de autoconsumo de combustible), ese público es casi con certeza la causa: tráfico curioso/genérico que no tiene ningún motivo real para registrarse. Diagnóstico compartido con Alfredo y aceptado como explicación más probable.
+
+**Siguiente paso acordado:** Alfredo no sabe armar campañas segmentadas en Ads Manager (solo ha usado el boost simple de Instagram) — se le ofreció guiarlo paso a paso, pantalla por pantalla, para armar una campaña real con objetivo "Clientes potenciales"/tráfico-a-conversión y audiencia por intereses (transporte/logística/gasolineras/dueños de negocio) o un público similar (Lookalike) basado en los contactos de HubSpot. **Se decidió que esto merece su propio proyecto/sesión dedicada** (es trabajo de estrategia de marketing/Ads Manager, no de este repo de código) — ver prompt de arranque que se le dio a Alfredo para esa sesión nueva.
+
+### Estado al cierre de sesión (24-sep-2026, tarde)
+Sitio, Autocheck Plus, PDF, panel interno y vista previa de la liga — todo funcionando en producción, sin bugs encontrados en el sitio. **Cero autochecks reales desde que arrancó la publicidad**, con causa raíz identificada del lado de Instagram (audiencia sin segmentar) y un bloqueo de presupuesto ya resuelto del lado de LinkedIn. El siguiente ciclo de publicidad depende de que Alfredo arme una campaña mejor segmentada (proyecto aparte) y de que Facebook (si se activa por separado) se revise igual.
 
 ### Pendientes al cierre de sesión 12
-1. **Nurture emails** — aprobar textos, decidir 1 vs 2 recordatorios, decidir mecanismo del botón de Precheck PRO. Sigue siendo el pendiente de mayor prioridad de negocio.
+1. **Nurture emails** — aprobar textos, decidir 1 vs 2 recordatorios, decidir mecanismo del botón de Precheck PRO. Sigue siendo el pendiente de mayor prioridad de negocio de este repo.
 2. Confirmar que `autocheck@mail.autoconsumo.mx` recibe correo.
-3. Alfredo: poner `?utm_source=instagram`/`facebook`/`linkedin`/`website` en las ligas reales (anuncios + botón de la homepage) — nada de esto se ha puesto todavía.
-4. Confirmar en Meta Ads Manager / LinkedIn Campaign Manager el estado real de las campañas (activo/revisión/impresiones) dado que sigue en cero.
-5. Borrar `alegra-probe-temp`.
-6. Los de siempre, sin tocar esta sesión: listas activas de HubSpot, OXXO/SPEI, caducidad de `PLUS750`, `supabase_setup.sql` desactualizado (ahora también le faltan `autocheck_staff`, las columnas `utm_*` y el esquema de `panel-interno`), adjuntar PDF del ticket de Alegra al correo de compra.
+3. Alfredo: poner `?utm_source=facebook`/`website` donde falten (instagram y el intento de LinkedIn ya quedaron con su UTM correcto).
+4. Armar una campaña de Instagram/Meta real con segmentación (proyecto aparte, ver prompt de arranque más abajo en el historial de chat) — el boost actual con audiencia "todo México 18-65" es la causa más probable de 0 conversiones pese a 148 visitas reales.
+5. Confirmar que el error de presupuesto de LinkedIn ya se resolvió con los $75 adicionales y que el conjunto de anuncios nuevo pudo lanzarse.
+6. Instalar la LinkedIn Insight Tag para medición confiable de visitas reales (LinkedIn lo pide en su propio dashboard).
+7. Borrar `alegra-probe-temp`.
+8. Los de siempre, sin tocar esta sesión: listas activas de HubSpot, OXXO/SPEI, caducidad de `PLUS750`, `supabase_setup.sql` desactualizado (ahora también le faltan `autocheck_staff`, las columnas `utm_*` y el esquema de `panel-interno`), adjuntar PDF del ticket de Alegra al correo de compra.
 
 ## ⏸️ Sesión pausada — 23-sep-2026 (sesión 11) — PDF del reporte rediseñado, mensajes de alertas reescritos y cupón en el banner (todo en producción, listo para la publicidad del 24-sep)
 
