@@ -104,6 +104,7 @@
         <h2>Usuarios y Autochecks</h2>
         <div class="fila"><span>Total de suscriptores</span><span id="v-total-suscriptores">—</span></div>
         <div class="fila"><span>Autochecks ejecutados</span><span id="v-autochecks-ejecutados">—</span></div>
+        <div class="fila"><span>Usuarios con 0 autochecks</span><span id="v-con-0">—</span></div>
         <div class="fila"><span>Usuarios con 1 autocheck</span><span id="v-con-1">—</span></div>
         <div class="fila"><span>Usuarios con 2 autochecks</span><span id="v-con-2">—</span></div>
         <div class="fila"><span>Usuarios con 3+ autochecks</span><span id="v-con-3-mas">—</span></div>
@@ -225,6 +226,7 @@
 
     document.getElementById('v-total-suscriptores').textContent = datos.usuarios.total_suscriptores;
     document.getElementById('v-autochecks-ejecutados').textContent = datos.usuarios.autochecks_ejecutados;
+    document.getElementById('v-con-0').textContent = datos.usuarios.con_0;
     document.getElementById('v-con-1').textContent = datos.usuarios.con_1;
     document.getElementById('v-con-2').textContent = datos.usuarios.con_2;
     document.getElementById('v-con-3-mas').textContent = datos.usuarios.con_3_mas;

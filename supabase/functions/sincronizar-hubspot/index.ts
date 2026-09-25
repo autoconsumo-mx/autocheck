@@ -48,6 +48,39 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const RESEND_FROM_EMAIL = "autocheck@autoconsumo.mx";
+const RESEND_FROM_NAME = "Autocheck · autoconsumo.mx";
+const CORREO_AVISO_REGISTRO = "autoconsumo@energie.mx";
+
+function escaparHtml(t: unknown): string {
+  return String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+
+// Aviso de un registro Freemium nuevo (primera vez que este correo se sincroniza con HubSpot).
+// No debe tumbar la sincronización si falla — se llama envuelto en try/catch.
+async function enviarAvisoRegistro(supabaseAdmin: ReturnType<typeof createClient>, correo: string, metadata: Record<string, unknown>) {
+  const { data: resendKey, error } = await supabaseAdmin.rpc("obtener_resend_api_key");
+  if (error || !resendKey) throw new Error("No se pudo obtener la API key de Resend: " + (error?.message || "no configurada"));
+
+  const nombre = escaparHtml(metadata?.nombre_contacto || "(sin nombre)");
+  const empresa = escaparHtml(metadata?.empresa || "(sin empresa)");
+  const html = `<p><strong>${nombre}</strong>, de la empresa <strong>${empresa}</strong>, se registró como Freemium con el correo <strong>${escaparHtml(correo)}</strong>.</p>`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
+      to: [CORREO_AVISO_REGISTRO],
+      subject: `Nuevo registro Freemium — Autocheck`,
+      html,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Resend (aviso registro) respondió ${res.status}: ${JSON.stringify(data)}`);
+  return data;
+}
+
 function respuestaJson(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });
 }
@@ -225,16 +258,36 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => ({}));
 
     let correo: string | undefined;
+    let metadata: Record<string, unknown> = {};
+    let esLlamadaDelSitio = false;
     if (token && token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
       correo = typeof body?.correo === "string" ? body.correo : undefined;
     } else {
       const { data, error } = await supabaseAdmin.auth.getUser(token);
       if (error || !data?.user?.email) return respuestaJson({ ok: false, error: "sesión inválida" }, 401);
       correo = data.user.email;
+      metadata = data.user.user_metadata || {};
+      esLlamadaDelSitio = true;
     }
     if (!correo) return respuestaJson({ ok: false, error: "Falta el correo" }, 400);
+    correo = correo.trim().toLowerCase();
 
-    return respuestaJson(await sincronizar(supabaseAdmin, correo.trim().toLowerCase()));
+    // Si nunca se había sincronizado este correo, es su primer contacto con HubSpot — avisar.
+    const yaExistia = esLlamadaDelSitio
+      ? !!(await supabaseAdmin.from("hubspot_sync").select("correo").eq("correo", correo).maybeSingle()).data
+      : true;
+
+    const resultado = await sincronizar(supabaseAdmin, correo);
+
+    if (esLlamadaDelSitio && !yaExistia) {
+      try {
+        await enviarAvisoRegistro(supabaseAdmin, correo, metadata);
+      } catch (e) {
+        console.error("No se pudo enviar el aviso de registro:", e);
+      }
+    }
+
+    return respuestaJson(resultado);
   } catch (e) {
     console.error(e);
     return respuestaJson({ ok: false, error: String((e as Error)?.message || e) }, 500);
