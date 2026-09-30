@@ -3,6 +3,33 @@
 ## Objetivo
 Formulario público, tipo wizard (7 pasos), para que empresas con instalaciones de autoconsumo de combustible (diesel, gasolina, GLP, GN — para su propia flota, no venta al público) hagan un autocheck de qué tan lista está su instalación para gestionar su registro regulatorio (SENER/CRE/CNE/ASEA). Las respuestas se guardan en Supabase, incluyendo un puntaje numérico con medidor gráfico. El correo se verifica por OTP antes de dejar avanzar, para filtrar spam, y se pide consentimiento explícito (Aviso de Privacidad) antes de continuar.
 
+## ✅ Sesión 13 — 29/30-sep-2026 — Correos de Auth que solo llegaban a Gmail: causa (DNS) encontrada y resuelta; base de datos limpiada
+
+### Incidente
+Los correos de confirmación de registro y de código OTP solo llegaban a Gmail. Yahoo, UNAM y correos corporativos (itgas, otgas) no los recibían. En Resend aparecían "Delivered" (Yahoo/UNAM) o "Delivery Delayed" (corporativos), y en `auth.users` los 5 registros del 29-sep quedaron sin confirmar.
+
+### Causa
+El dominio de envío `autoconsumo.mx` (único dominio verificado en Resend, compartido con PacoCuentas y Torre de Control) tenía DKIM (`resend._domainkey`) y SPF de retorno (`send.`) pero **no tenía DMARC ni SPF en la raíz**. Gmail lo tolera; Yahoo y los filtros corporativos no. No era un problema del SMTP de Supabase (ya usa Resend por Custom SMTP) ni de las llaves de API (los permisos no afectan la entrega).
+
+### Solución (hecha por Alfredo en el DNS de Akky)
+- TXT `_dmarc` → `"v=DMARC1; p=none;"`
+- TXT en la raíz (`@`) → `v=spf1 include:_spf.google.com include:51056347.spf04.hubspotemail.net include:amazonses.com ~all` (el mismo que ya tenía `mail.autoconsumo.mx`, para no romper Google Workspace ni HubSpot)
+- **Detalle de Akky:** al *editar* registros existentes o crearlos por primera vez, el panel los mostraba pero no los publicaba en sus nameservers (`ns1/2/3.akkyservicios.mx`). Se publicaron solo al **borrarlos y volver a crearlos**. La forma de verificar: `Resolve-DnsName <nombre> -Type TXT -Server ns1.akkyservicios.mx`; el número de serie del SOA es un timestamp Unix que indica la última recarga de la zona.
+- Resultado verificado en vivo: confirmación y código llegan a la bandeja de entrada de Gmail, Yahoo y `energie.mx`; el aviso interno "Nuevo registro Freemium" también.
+
+### Observaciones (sin acción)
+- `mail.autoconsumo.mx` es el dominio de envío de HubSpot (MX a Google, SPF y DMARC propios). No se usó para Resend, a propósito, para no mezclar reputación.
+- Los correos a servidores corporativos (`itgas.com.mx`) pueden seguir retrasados por sus filtros; si un cliente reporta que no le llega, sus TI deben permitir `autocheck@autoconsumo.mx`.
+- El botón del correo de confirmación funciona (lleva a "Verifica tu correo" y manda el OTP). Un escáner de enlaces (Yahoo, antivirus corporativos) puede gastar la liga de un solo uso y dejar al usuario en la portada; en ese caso la página no muestra aviso (`manejarLlegadaConfirmacionCorreo`, `index.html`). **Mejora opcional pendiente:** mostrar la pantalla de acceso con un aviso cuando la liga venga con error.
+- La plantilla de "Confirm signup" en Supabase tiene "Hemos confirmando tu correo… ¡Todo listo!" y botón "GENERAR CÓDIGO"; funciona. Hay una versión más clara en `docs/plantilla-confirm-signup.html` ("Confirma tu correo aquí: CONFIRMAR") lista para pegar cuando se quiera.
+- La llave de Resend `autocheck` es "Full access", pero el código solo usa `POST /emails`. Conviene bajarla a "Sending access" y actualizar a la vez el secreto `resend_api_key` del Vault y el SMTP de Auth.
+
+### Limpieza de datos de prueba (30-sep-2026)
+Todo lo que había era de pruebas de Alfredo (incluidos los dos pagos de Stripe, que se devolvieron). Se vaciaron `leads_autocheck_estaciones`, `autocheck_membresias`, `autocheck_plus_pagos_procesados` y `hubspot_sync`, y se borraron todos los usuarios de `auth.users` salvo `autoconsumo@energie.mx` (que sigue en `autocheck_staff`, acceso al panel interno). Lo ejecutó Alfredo en el SQL Editor porque la herramienta de Claude bloqueó el borrado masivo. **Pendiente:** quedan en HubSpot 4 contactos/negocios de prueba (`contenidosfactory@gmail.com`, `op@energie.mx`, `alfredoorellana.mx@gmail.com`, `correo.alfredo@yahoo.com`).
+
+### Para el clon (Autocheck en otros dominios/proyectos)
+Antes de lanzar cualquier clon: (1) verificar el dominio de envío en Resend con DKIM y SPF, (2) publicar `_dmarc` y SPF de la raíz, (3) probar con Yahoo, Outlook y un correo corporativo — Gmail solo no basta. Ver también la memoria del clon Regsalud.
+
 ## ⏸️ Sesión pausada — 24-sep-2026 (sesión 12) — Copia interna por autocheck, UTM de campañas, Panel interno (staff) construido, vista previa de la liga en WhatsApp/redes
 
 Primer día de publicidad (arrancó el 24-sep). Antes de tocar nada se revisaron los logs de `enviar-reporte-autocheck`, `webhook-compra-plus` y `sincronizar-hubspot`: sin errores nuevos desde el cierre de sesión 11.
