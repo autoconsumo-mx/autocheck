@@ -185,21 +185,18 @@
 
   .portada-cta-titulo { color: #20232B; font-size: 18px; font-weight: 700; margin: 0 0 20px; text-align: center; }
   .portada-cards-wrap { padding: 36px clamp(16px,4vw,36px) 8px; }
-  .portada-cards { display: flex; gap: 24px; }
-  @media (max-width: 680px) { .portada-cards { flex-direction: column; } }
-  .portada-card {
-    flex: 1; background: #FBFBFC; border-radius: 14px; border: 1px solid #E7E7EA;
-    padding: 26px 26px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
-  }
-  .portada-card-eyebrow { color: #9A9AA2; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-  .portada-card-titulo { color: #20232B; font-size: 19px; font-weight: 800; }
-  .portada-card-lista { margin: 2px 0 8px; padding-left: 18px; color: #5B5F6B; font-size: 13px; line-height: 1.6; }
-  .portada-card-lista li { margin-bottom: 2px; }
   .btn-portada-primario, .btn-portada-secundario {
     border-radius: 9px; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; border: none;
   }
   .btn-portada-primario { background: var(--naranja); color: #fff; }
   .btn-portada-primario:hover { background: var(--naranja-oscuro); }
+  .btn-portada-hero { width: auto; align-self: flex-start; padding: 13px 28px; margin-top: 4px; }
+  @media (max-width: 680px) { .btn-portada-hero { align-self: stretch; } }
+  .portada-cards-wrap { text-align: center; }
+  .portada-linea-cta { max-width: 320px; margin: 0 auto 20px; }
+  .btn-portada-cta { align-self: auto; }
+  .portada-semaforo-titulo { color: #20232B; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; margin-top: 2px; }
+  .portada-linea { border: 0; border-top: 1px solid #EFEFF1; margin: 4px 0; width: 100%; }
   .btn-portada-secundario { background: #fff; color: var(--naranja); border: 2px solid var(--naranja); }
   .btn-portada-secundario:hover { background: rgba(255,102,0,0.06); }
 
@@ -435,17 +432,22 @@
     <div class="portada-hero-row">
       <div class="portada-hero-texto">
         <div class="portada-titulo-superior">REGISTRO DE AUTOCONSUMOS CNE-2026</div>
-        <div class="portada-eyebrow">SERVICIO GRATUITO PARA SUSCRIPTORES DE AUTOCONSUMO.MX</div>
+        <div class="portada-eyebrow">¡SCORE GRATUITO!</div>
         <h1 class="portada-titulo">¿Qué tan lista está tu instalación para el registro regulatorio?</h1>
-        <p class="portada-texto">Antes de entregar información sensible de tu empresa, haz tu propio Autocheck: te dice en minutos dónde estás bien y dónde hay pendientes.</p>
+        <p class="portada-texto">Antes de entregar la información de tu empresa a la autoridad, haz tu propio Autocheck: te decimos en minutos lo que está listo y lo que falta para tener un registro exitoso y una operación sin zozobras.</p>
+        <button type="button" class="btn-portada-primario btn-portada-hero" id="btn-quiero-autocheck">¡Quiero mi Autocheck YA!</button>
+        <hr class="portada-linea">
+        <div class="portada-semaforo-titulo">SEMÁFORO CLARO:</div>
         <div class="portada-bullets">
-          <div class="portada-bullet">🟡 Marca advertencias antes de que sean un problema</div>
-          <div class="portada-bullet">🔴 Señala avisos críticos que bloquean tu registro</div>
+          <div class="portada-bullet">🟢 Tus puntos a favor</div>
+          <div class="portada-bullet">🟡 Advertencias oportunas, antes de un problema</div>
+          <div class="portada-bullet">🔴 Avisos críticos que son riesgos a atender</div>
         </div>
+        <hr class="portada-linea">
         <div class="portada-preguntas">
-          <p>¿Quieres saber si puedes registrarte?</p>
-          <p>¿Quieres conocer lo que te falta?</p>
           <p>¿Conoces tus riesgos?</p>
+          <p>¿Quieres certeza antes del trámite?</p>
+          <p>¡Recibe tu AutoCheck por mail!</p>
         </div>
         <div class="portada-cita-recuadro">
           <p class="portada-cita-titulo">¿Me registro o no?</p>
@@ -467,6 +469,7 @@
             <text x="65" y="73" text-anchor="middle" fill="var(--texto)" font-size="26" font-weight="800" font-family="Arial, Helvetica, sans-serif">67%</text>
           </svg>
           <div class="etiqueta">Ejemplo de tu score</div>
+          <button type="button" class="btn-portada-primario" id="btn-crear-score">CREA TU SCORE GRATIS</button>
         </div>
       </div>
     </div>
@@ -474,29 +477,9 @@
     <div class="portada-divisor"></div>
 
     <div class="portada-cards-wrap">
-      <div class="portada-cta-titulo">Empieza tu Autocheck</div>
-      <div class="portada-cards">
-        <div class="portada-card">
-          <div class="portada-card-eyebrow">¿Primera vez aquí?</div>
-          <div class="portada-card-titulo">Suscríbete gratis</div>
-          <ul class="portada-card-lista">
-            <li>Registra tus datos</li>
-            <li>Acepta el Aviso de Privacidad</li>
-            <li>Confirma tu correo y listo!</li>
-          </ul>
-          <button type="button" class="btn-portada-secundario" id="btn-ir-suscribir">Suscribirme gratis</button>
-        </div>
-        <div class="portada-card">
-          <div class="portada-card-eyebrow">¿Ya tienes suscripción?</div>
-          <div class="portada-card-titulo">Entra directo al Autocheck</div>
-          <ul class="portada-card-lista">
-            <li>Ingresa tu correo</li>
-            <li>Recibe tu código de acceso</li>
-            <li>Utiliza el formulario y obtén tu resultado!</li>
-          </ul>
-          <button type="button" class="btn-portada-primario" id="btn-ir-acceso">Entrar a mi Autocheck</button>
-        </div>
-      </div>
+      <div class="portada-cta-titulo">Genera tu SCORE de Autocheck<br>¡Sin costo!</div>
+      <hr class="portada-linea portada-linea-cta">
+      <button type="button" class="btn-portada-primario btn-portada-hero btn-portada-cta" id="btn-ir-acceso">¡Quiero mi Autocheck!</button>
     </div>
 
     <div class="portada-legal">
@@ -525,7 +508,7 @@
 
   <div class="pantalla-acceso" id="pantalla-acceso">
     <h2>Entra a tu Autocheck</h2>
-    <p class="subtitulo">Ingresa el correo con el que te suscribiste. Te enviaremos un código de acceso.</p>
+    <p class="subtitulo">Ingresa tu correo para recibir tu código de acceso al Autocheck</p>
     <div class="campo" style="margin-top:16px;">
       <label for="acceso-correo">Correo <span class="requerido">*</span></label>
       <input type="email" id="acceso-correo" required>
@@ -1363,22 +1346,20 @@
   const contenedorPrincipal = document.getElementById('contenedor-principal');
 
   // --- Portada: elegir entre suscribirse (nuevo) o entrar directo (suscriptor existente) ---
-  document.getElementById('btn-ir-suscribir').addEventListener('click', () => {
-    portada.style.display = 'none';
-    contenedorPrincipal.style.display = 'block';
-    document.querySelector('.progreso-wrap').style.display = 'block';
-    formulario.style.display = 'block';
-    pasoActual = 0;
-    mostrarPaso(pasoActual);
-  });
-
-  document.getElementById('btn-ir-acceso').addEventListener('click', () => {
+  // Los tres botones de la portada ("¡Quiero mi Autocheck YA!", "CREA TU SCORE GRATIS" bajo el
+  // medidor y "¡Quiero mi Autocheck!") llevan a la misma pantalla: pedir el correo y mandar el
+  // código OTP. Si el correo no está registrado, esa pantalla ofrece "SUSCRÍBETE GRATIS" y
+  // manda al alta con el correo ya escrito.
+  function irAPantallaAcceso() {
     portada.style.display = 'none';
     contenedorPrincipal.style.display = 'block';
     pantallaAcceso.style.display = 'block';
     reiniciarPantallaAcceso();
     document.getElementById('acceso-correo').focus();
-  });
+  }
+  document.getElementById('btn-ir-acceso').addEventListener('click', irAPantallaAcceso);
+  document.getElementById('btn-crear-score').addEventListener('click', irAPantallaAcceso);
+  document.getElementById('btn-quiero-autocheck').addEventListener('click', irAPantallaAcceso);
 
   // Cantidad de pasos "reales" del cuestionario (excluye el paso 1, "Datos de tu
   // suscripción", que es un pre-paso sin numerar — ver mostrarPaso/actualizarProgreso).
@@ -1568,7 +1549,7 @@
   // --- Acceso directo (suscriptor existente): solo pide correo y salta al cuestionario ---
   // Si el correo no existe como suscriptor, en vez de dejar que sigan picando "Enviar código"
   // (lo que dispara un signInWithOtp de más cada vez y gasta cuota de Supabase para nada),
-  // el botón se convierte en "Quiero suscribirme" y los manda directo al alta con el correo
+  // el botón se convierte en "SUSCRÍBETE GRATIS" y los manda directo al alta con el correo
   // ya prellenado.
   const btnAccesoEnviar = document.getElementById('btn-acceso-enviar');
   const accesoCorreoInput = document.getElementById('acceso-correo');
@@ -1628,10 +1609,10 @@
         return;
       }
       if (esErrorCuentaNoEncontrada(error)) {
-        accesoMensajeEl.textContent = 'No encontramos una suscripción activa con ese correo.';
+        accesoMensajeEl.textContent = 'Aún no te has registrado:';
         accesoMensajeEl.classList.add('error');
         accesoCorreoNoEncontrado = true;
-        btnAccesoEnviar.textContent = 'Quiero suscribirme';
+        btnAccesoEnviar.textContent = 'SUSCRÍBETE GRATIS';
         return;
       }
       accesoMensajeEl.textContent = 'No pudimos enviar el código. Intenta de nuevo en un momento.';
