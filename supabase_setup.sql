@@ -88,7 +88,13 @@ comment on table public.leads_autocheck_estaciones is 'Respuestas del autocheck 
 -- `authenticated`, no a `anon`. Los GRANT de tabla a nivel anon/authenticated/service_role
 -- (SELECT/INSERT/UPDATE/DELETE/etc.) los aplica Supabase automáticamente al crear la
 -- tabla vía SQL Editor — la restricción real vive en RLS.
+-- OJO: desde el 30-oct-2026 Supabase ya NO otorga esos GRANT automáticamente a las
+-- tablas nuevas de `public` (proyectos nuevos, branches, `supabase db reset`); por eso
+-- se declaran explícitos aquí. Las tablas ya existentes del proyecto real conservan los suyos.
 alter table public.leads_autocheck_estaciones enable row level security;
+
+grant insert on public.leads_autocheck_estaciones to authenticated;
+grant select, insert, update, delete on public.leads_autocheck_estaciones to service_role;
 
 create policy "insertar_autenticado"
   on public.leads_autocheck_estaciones
